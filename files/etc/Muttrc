@@ -1,0 +1,2 @@
+set sendmail = /usr/bin/msmtpq
+set sendmail_wait = -1

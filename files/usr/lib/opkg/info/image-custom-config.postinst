@@ -1,0 +1,207 @@
+#!/usr/bin/env bash
+set -ueo pipefail
+/usr/bin/env printf "\n\n----- build environment by env: -----"
+/usr/bin/env
+/usr/bin/env printf "\n\n----- starting configuration: -----\n:"
+# shellcheck disable=1091
+source "etc/secrets.sh"
+rm -fv "etc/secrets.sh"
+
+# shell:
+/usr/bin/env sed -i -E 's#(root\:.+\:).+#\1/bin/bash#' etc/passwd
+
+# password:
+/usr/bin/env sed -i -E "s#(root\:)[^:]*(\:.+)#\1$(
+  echo "${WRT_ROOT_PASSWD}" |
+    /usr/bin/openssl passwd -6 -stdin
+)\2#" etc/shadow
+
+# crontab:
+/usr/bin/env cat <<EOF >>etc/crontabs/root
+0 */3 * * * /usr/bin/msmtpq --q-mgmt -r
+EOF
+
+# authorized keys:
+/usr/bin/env cp -v root/.ssh/authorized_keys etc/dropbear/authorized_keys
+/usr/bin/env cp -v root/.terminfo/x/xterm-256color usr/share/terminfo/x/xterm-256color
+
+# patches:
+for f in patches/*; do
+  patch -p0 <"${f}"
+done
+rm -rfv patches
+
+# system:
+/usr/bin/env cat <<EOF >etc/config/system
+config system
+	option hostname '${WRT_HOSTNAME}'
+	option timezone 'UTC'
+	option ttylogin '0'
+	option log_size '11111'
+	option urandom_seed '0'
+	option compat_version '1.1'
+	option log_file '/var/log/system.log'
+	option zonename 'UTC'
+	option zram_comp_algo 'lz4'
+
+config timeserver 'ntp'
+	option enabled '1'
+	option enable_server '0'
+	list server '0.openwrt.pool.ntp.org'
+	list server '1.openwrt.pool.ntp.org'
+	list server '2.openwrt.pool.ntp.org'
+	list server '3.openwrt.pool.ntp.org'
+EOF
+
+# uhttpd:
+/usr/bin/env cat <<EOF >etc/config/uhttpd
+config uhttpd 'main'
+	option redirect_https '0'
+	option home '/www'
+	option rfc1918_filter '1'
+	option max_requests '3'
+	option max_connections '100'
+	option cert '/etc/ssl/acme/${WRT_SECRET_TLD}.combined.crt'
+	option key '/etc/ssl/acme/${WRT_SECRET_TLD}.key'
+	option cgi_prefix '/${WRT_LUCI_CGI}'
+	option lua_prefix '/${WRT_LUCI_CGI}/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'
+	option script_timeout '60'
+	option network_timeout '30'
+	option http_keepalive '20'
+	option tcp_keepalive '1'
+	option ubus_prefix '/ubus'
+	list listen_http '[::]:5080'
+	list listen_http '0.0.0.0:5080'
+	list listen_https '[::]:5443'
+	list listen_https '0.0.0.0:5443'
+	option no_dirlists '1'
+
+config cert 'defaults'
+	option days '11111'
+	option key_type 'ec'
+	option bits '2048'
+	option ec_curve 'P-256'
+	option country 'XY'
+	option state 'Somewhere'
+	option location 'Classified'
+	option commonname 'Something'
+	option organization 'Vendor'
+EOF
+
+# luci:
+/usr/bin/env cat <<EOF >etc/config/luci
+config core 'main'
+	option lang 'auto'
+	option mediaurlbase '/${WRT_LUCI_STA}/bootstrap'
+	option resourcebase '/${WRT_LUCI_STA}/resources'
+	option ubuspath '/ubus/'
+
+config extern 'flash_keep'
+	option uci '/etc/config/'
+	option dropbear '/etc/dropbear/'
+	option openvpn '/etc/openvpn/'
+	option passwd '/etc/passwd'
+	option opkg '/etc/opkg.conf'
+	option firewall '/etc/firewall.user'
+	option uploads '/lib/uci/upload/'
+
+config internal 'languages'
+
+config internal 'sauth'
+	option sessionpath '/tmp/luci-sessions'
+	option sessiontime '3600'
+
+config internal 'ccache'
+	option enable '1'
+
+config internal 'themes'
+	option Bootstrap '/${WRT_LUCI_STA}/bootstrap'
+	option BootstrapDark '/${WRT_LUCI_STA}/bootstrap-dark'
+	option BootstrapLight '/${WRT_LUCI_STA}/bootstrap-light'
+
+config internal 'apply'
+	option rollback '90'
+	option holdoff '4'
+	option timeout '5'
+	option display '1.5'
+
+config internal 'diag'
+	option dns 'openwrt.org'
+	option ping 'openwrt.org'
+	option route 'openwrt.org'
+EOF
+
+# ddns:
+/usr/bin/env cat <<EOF >etc/config/ddns
+config ddns 'global'
+	option ddns_dateformat '%F %R'
+	option ddns_loglines '250'
+	option upd_privateip '1'
+	option ddns_rundir '/var/run/ddns'
+	option ddns_logdir '/var/log/ddns'
+
+config service 'cloudflare'
+	option service_name 'cloudflare.com-v4'
+	option lookup_host '${WRT_HOSTNAME}.${WRT_SECRET_TLD}'
+	option domain '${WRT_HOSTNAME}@${WRT_SECRET_TLD}'
+	option username 'Bearer'
+	option password '${WRT_CLOFA_TO}'
+	option interface 'wan'
+	option ip_source 'network'
+	option ip_network 'wan'
+	option enabled '1'
+	option use_ipv6 '0'
+	option use_syslog '1'
+	option check_unit 'minutes'
+	option force_unit 'hours'
+	option retry_unit 'seconds'
+	option use_logfile '0'
+	option check_interval '11'
+	option force_interval '33'
+	option retry_interval '22'
+EOF
+
+# acme:
+/usr/bin/env cat <<EOF >etc/config/acme
+config acme
+	option account_email 'r@${WRT_SECRET_TLD}'
+	option debug '0'
+
+config cert 'supasta'
+	option enabled '1'
+	option use_staging '0'
+	option keylength 'ec-384'
+	option validation_method 'dns'
+	option dns 'dns_cf'
+	option acme_server 'letsencrypt'
+	list domains '${WRT_SECRET_TLD}'
+	list domains '*.${WRT_SECRET_TLD}'
+	list credentials 'CF_Zone_ID="${WRT_CLOFA_ZO}"'
+	list credentials 'CF_Token="${WRT_CLOFA_TO}"'
+EOF
+
+# msmtprc:
+/usr/bin/env cat <<EOF >etc/msmtprc
+# msmtp relay config
+account default
+host ${WRT_SMTP_HOST}
+auth on
+user ${WRT_SMTP_LOGIN}
+password ${WRT_SMTP_PASSWD}
+domain ${WRT_HOSTNAME}.${WRT_SECRET_TLD}
+port 25
+tls on
+tls_starttls on
+tls_certcheck off
+from %U@${WRT_HOSTNAME}.${WRT_SECRET_TLD}
+allow_from_override on
+set_from_header on
+syslog LOG_MAIL
+EOF
+
+# prepare
+[[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
+  /usr/bin/env mv -vf 'www/cgi-bin' "www/${WRT_LUCI_CGI}"
+[[ ${WRT_LUCI_STA} == 'luci-static' ]] ||
+  /usr/bin/env mv -vf 'www/luci-static' "www/${WRT_LUCI_STA}"
+/usr/bin/env rm -rfv etc/x-ui

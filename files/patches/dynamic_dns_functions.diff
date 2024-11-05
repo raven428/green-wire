@@ -1,0 +1,18 @@
+--- usr/lib/ddns/dynamic_dns_functions.sh-orig	2024-11-29 16:10:50.872742400 +0000
++++ usr/lib/ddns/dynamic_dns_functions.sh	2024-11-29 16:06:46.093273000 +0000
+@@ -264,6 +264,15 @@
+ 		5)	__CMD="logger -p user.notice -t ddns-scripts[$$] $SECTION_ID: $__MSG"
+ 			__MSG=" $__TIME  note : $__MSG" ;;
+ 		6)	__CMD="logger -p user.info -t ddns-scripts[$$] $SECTION_ID: $__MSG"
++			echo $__MSG | grep -i rerun >/dev/null 2>/dev/null ||
++			echo "$__MSG" |
++			/usr/bin/env mutt \
++			-e 'set envelope_from=yes' \
++			-e "set from=ddns@${HOSTNAME}.localdomain" \
++			-e 'set realname="служба роботов"' \
++			-e 'set send_charset=utf-8' \
++			-s 'новости ddns подсистемы' \
++			'raven428@gmail.com'
+ 			__MSG=" $__TIME  info : $__MSG" ;;
+ 		7)	__MSG=" $__TIME       : $__MSG";;
+ 		*) 	return;;

@@ -1,0 +1,35 @@
+--- usr/bin/msmtpq-orig	2024-11-29 15:39:28.144075774 +0000
++++ usr/bin/msmtpq	2024-11-29 15:39:59.476153191 +0000
+@@ -172,26 +172,13 @@
+ ## write/remove queue lockfile for a queue op
+ ##
+ lock_queue() {        # <-- '-u' to remove lockfile
+-  local LOK="${MSMTPQ_Q}/.lock"      # lock file name
+-  local -i MAX=240 SEC=0             # max seconds to gain a lock ; seconds waiting
+-
+-  if [ -z "$1" ] ; then              # lock queue
+-    ## Philipp Hartwig patch #2
+-    'mkdir' "$LOK" 2>/dev/null && LKD='t'
+-    while [ -z "$LKD" ] && [ "$SEC" -lt "$MAX" ]; do # lock file present
+-      sleep 1                                        # wait a second
+-      SEC=$((SEC + 1))                               # accumulate seconds
+-      'mkdir' "$LOK" 2>/dev/null && LKD='t'          # make lockdir ; lock queue ; set flag
+-    done                                             # try again while locked for MAX secs
+-    [ -z "$LKD" ] && \
+-	    err '' "cannot use queue $MSMTPQ_Q : waited $MAX seconds for"\
+-	           "  lockdir [ $LOK ] to vanish ; giving up"\
+-	           'if you are certain that no other instance of this script'\
+-	           "  is running, then 'rmdir' the lock dir manually" '' # lock file still there, give up
+-
+-  elif [ "$1" = '-u' ] ; then        # unlock queue
+-    'rmdir' "$LOK"                   # remove the lock
+-    unset LKD                        # unset flag
++  local LOK="${MSMTPQ_Q}/.lock"
++  if [[ -z "$1" ]] ; then              # lock queue
++    exec 9> "${LOK}"
++    /usr/bin/env flock 9
++  elif [[ "$1" = '-u' ]] ; then        # unlock queue
++    /usr/bin/env flock -u 9
++    /usr/bin/env rm -f "${LOK}"
+   fi
+ }

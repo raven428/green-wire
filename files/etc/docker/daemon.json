@@ -1,0 +1,4 @@
+{
+  "bridge": "none",
+  "iptables": false
+}
