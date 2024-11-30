@@ -1,0 +1,27 @@
+name: test build
+on:
+  push:
+    branches:
+      - master
+jobs:
+  test-build:
+    name: test build
+    timeout-minutes: 7
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: recursive
+      - name: login to ghcr
+        if: "github.ref == 'refs/heads/master'"
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.REGISTRY_WRITER }}
+      - name: container image
+        run: ./image.sh
+      - name: device image
+        run: ./build.sh
