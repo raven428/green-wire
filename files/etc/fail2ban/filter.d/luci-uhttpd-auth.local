@@ -1,0 +1,3 @@
+# fail2ban filter configuration for luci uhttpd auth
+[Definition]
+failregex = \[info\] luci\: failed login on .+ for .+ from <HOST>
