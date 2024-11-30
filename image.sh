@@ -8,7 +8,7 @@ set -ueo pipefail
   -t "${TARGET_REGISTRY}/${TAG}:latest" \
   -t "${TARGET_REGISTRY}/${TAG}:${IMAGE_VER}" \
   image
-if [[ "${GITHUB_REF:-refs/heads/master}"=="refs/heads/master" ]]; then
+if [[ "${GITHUB_REF:-refs/heads/master}" == "refs/heads/master" ]]; then
   /usr/bin/env docker push "${TARGET_REGISTRY}/${TAG}:latest"
   /usr/bin/env docker push "${TARGET_REGISTRY}/${TAG}:${IMAGE_VER}"
 fi
