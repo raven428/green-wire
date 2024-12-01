@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+# shellcheck disable=2154
 printf "cert [%s] done [%s] at [%s] dt" "${domains}" "${ACTION}" \
   "$(date '+%Y%m%dT%H%M%S')" |
   /usr/bin/env mutt \
@@ -7,6 +9,8 @@ printf "cert [%s] done [%s] at [%s] dt" "${domains}" "${ACTION}" \
     -e 'set send_charset=utf-8' \
     -s 'новости cert подсистемы' \
     "${account_email}"
-if [[ "$ACTION" = "renewed" ]]; then
-  /etc/init.d/3x-ui status && /etc/init.d/3x-ui restart
+if [[ "$ACTION" = "issued" ]]; then
+  for svc in 3x-ui uhttpd; do
+    /etc/init.d/${svc} status && /etc/init.d/${svc} restart
+  done
 fi

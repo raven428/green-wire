@@ -1,0 +1,20 @@
+# fail2ban jails
+
+[DEFAULT]
+bantime = 10h
+findtime = 3h
+maxretry = 5
+sender = fail2ban@<fq-hostname>
+destemail = raven428@gmail.com
+banaction = nftables-multiport[blocktype="drop",port="%(port)s"]
+		sendmail-whois-matches[sender="%(sender)s", dest="%(destemail)s", logpath="%(logpath)s", chain="%(chain)s"]
+
+[dropbear]
+port = 5022
+enabled = true
+logpath = %(openwrt_system_log)s
+
+[luci-uhttpd-auth]
+port = 5443
+enabled = true
+logpath = %(openwrt_system_log)s

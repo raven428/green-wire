@@ -1,0 +1,6 @@
+# dropbear filter
+[Definition]
+failregex = ^[Ee]xit before auth from \<<HOST>\:\d+\>
+            ^[Ll]ogin attempt for nonexistent user ('.*' )?from <HOST>:\d+$
+            ^[Bb]ad (PAM )?password attempt for .+ from <HOST>(:\d+)?$
+            ^[Ee]xit before auth \(user '.+', \d+ fails\): Max auth tries reached - user '.+' from <HOST>:\d+\s*$

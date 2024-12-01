@@ -1,5 +1,7 @@
 # My config of OpenWRT image for BPI-R3 board
 
+[![Build status](https://github.com/raven428/green-wire/actions/workflows/test-build.yaml/badge.svg)](https://github.com/raven428/green-wire/actions/workflows/test-build.yaml)
+
 ## Build steps
 
 * clone me:

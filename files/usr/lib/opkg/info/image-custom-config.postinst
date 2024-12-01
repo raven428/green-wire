@@ -18,18 +18,38 @@ rm -fv "etc/secrets.sh"
 
 # crontab:
 /usr/bin/env cat <<EOF >>etc/crontabs/root
-0 */3 * * * /usr/bin/msmtpq --q-mgmt -r
+0 */7 * * * /usr/bin/msmtpq --q-mgmt -r
 EOF
+
+# add hotplug debug log:
+# shellcheck disable=2016
+/usr/bin/env find etc/hotplug.d etc/udhcpc.user.d \
+  -mindepth 0 -maxdepth 1 -type d -exec bash -c '
+etype="$(basename $1)"
+[[ "${etype}" == "udhcpc.user.d" ]] && etype='\''udhcpc'\''
+echo printenv to [${etype}]
+cat > "$1/000-printenv.sh" <<EOF
+#!/usr/bin/env bash
+etype='\''${etype}'\''
+/usr/bin/env logger -t "hotplug.\${etype}" "cmdline: [\$0 \$@]"
+/usr/bin/env | /usr/bin/env logger -t "hotplug.\${etype}"
+exit 0
+EOF
+chmod +x "$1/000-printenv.sh"
+' _ {} \;
 
 # authorized keys:
 /usr/bin/env cp -v root/.ssh/authorized_keys etc/dropbear/authorized_keys
 /usr/bin/env cp -v root/.terminfo/x/xterm-256color usr/share/terminfo/x/xterm-256color
 
+# sendmail link for fail2ban:
+/usr/bin/env ln -vsf /usr/bin/msmtpq usr/sbin/sendmail
+
 # patches:
-for f in patches/*; do
+for f in patches/*.diff; do
   patch -p0 <"${f}"
 done
-rm -rfv patches
+/usr/bin/env rm -rfv patches
 
 # system:
 /usr/bin/env cat <<EOF >etc/config/system
@@ -61,7 +81,7 @@ config uhttpd 'main'
 	option rfc1918_filter '1'
 	option max_requests '3'
 	option max_connections '100'
-	option cert '/etc/ssl/acme/${WRT_SECRET_TLD}.combined.crt'
+	option cert '/etc/ssl/acme/${WRT_SECRET_TLD}.fullchain.crt'
 	option key '/etc/ssl/acme/${WRT_SECRET_TLD}.key'
 	option cgi_prefix '/${WRT_LUCI_CGI}'
 	option lua_prefix '/${WRT_LUCI_CGI}/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'

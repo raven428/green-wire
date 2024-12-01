@@ -1,0 +1,5 @@
+# OpenWRT paths overrides
+
+[DEFAULT]
+
+openwrt_system_log = /var/log/system.log
