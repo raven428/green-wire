@@ -219,7 +219,53 @@ set_from_header on
 syslog LOG_MAIL
 EOF
 
-# prepare
+# dokodemo warp:
+warp_reg='/usr/bin/warp-reg'
+/usr/bin/env curl -Lm 111 -o "${warp_reg}" \
+  https://github.com/badafans/warp-reg/releases/download/v1.0/main-linux-amd64
+/usr/bin/env chmod -v 755 "${warp_reg}"
+count=0
+warp_regions='m tr cy kz ge de us ng cl bg it'
+reg_data="$(${warp_reg})"
+pvk="$(
+  # shellcheck disable=2016
+  /usr/bin/env printf "%s\n" "${reg_data}" |
+    /usr/bin/env awk '{ if ($1=="private_key:") print $2 }'
+)"
+ipv6="$(
+  # shellcheck disable=2016
+  /usr/bin/env printf "%s\n" "${reg_data}" |
+    /usr/bin/env awk '{ if ($1=="v6:") print $2 }'
+)"
+if [[ -z "${pvk}" ]]; then
+  echo 'warp-reg failed…'
+  exit 1
+fi
+echo "ipv6 [${ipv6}] generated"
+for r in ${warp_regions}; do
+  port="$(/usr/bin/env printf '%03d' "$count")"
+  ipv4oct="$((count + 10))"
+  cat <<EOF >>etc/config/network
+
+config interface 'wgcf${r}'
+	option proto 'wireguard'
+	option private_key '${pvk}'
+	list addresses '172.16.0.${ipv4oct}/32'
+	list addresses '${ipv6}/128'
+
+config wireguard_wgcf${r} 'wgserver${r}'
+	option public_key 'bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo='
+	option endpoint_host '127.0.0.1'
+	option endpoint_port '11${port}'
+	option persistent_keepalive '11'
+	option route_allowed_ips '0'
+	list allowed_ips '0.0.0.0/0'
+	list allowed_ips '::/0'
+EOF
+  count=$((count + 1))
+done
+
+# hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
   /usr/bin/env mv -vf 'www/cgi-bin' "www/${WRT_LUCI_CGI}"
 [[ ${WRT_LUCI_STA} == 'luci-static' ]] ||
