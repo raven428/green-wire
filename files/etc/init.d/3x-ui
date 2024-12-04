@@ -16,6 +16,6 @@ start_service() {
     ${respawn_threshold:-333} \
     ${respawn_timeout:-3} \
     ${respawn_retry:-33}
-  procd_set_param command /opt/3x-ui/3x-ui
+  procd_set_param command bash -c 'cd /opt/3x-ui && exec /opt/3x-ui/3x-ui 2>&1'
   procd_close_instance
 }
