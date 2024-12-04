@@ -1,0 +1,10 @@
+# https://github.com/RockBlack-VPN/ip-address
+# https://www.rockblack.su/vpn/dopolnitelno/diapazon-ip-adresov
+# https://gist.github.com/iamwildtuna/7772b7c84a11bf6e1385f23096a73a15
+
+# https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Shadowrocket/YouTube/YouTube.list
+2620:120:e000::/40
+
+# https://servers.opennicproject.org - OpenNIC DoT servers:
+2603:c020:8006:9211:53::53
+2603:c020:800c:ebeb:53::53

@@ -1,28 +1,41 @@
 
-config defaults
+config defaults 'defaults'
 	option syn_flood '1'
-	option input 'REJECT'
+	option input 'DROP'
 	option output 'ACCEPT'
-	option forward 'REJECT'
+	option forward 'DROP'
 
-config zone
+config zone 'zone_lan'
 	option name 'lan'
 	list network 'lan'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
 	option forward 'ACCEPT'
 
-config zone
+config zone 'zone_wan'
 	option name 'wan'
-	list network 'wan'
+	list network 'wan4'
 	list network 'wan6'
-	option input 'REJECT'
+	list network 'wgcfm'
+	list network 'wgcftr'
+	list network 'wgcfcy'
+	list network 'wgcfkz'
+	list network 'wgcfge'
+	list network 'wgcfde'
+	list network 'wgcfus'
+	list network 'wgcfng'
+	list network 'wgcfcl'
+	list network 'wgcfbg'
+	list network 'wgcfit'
+	list network 'tun2ray'
+	option input 'DROP'
 	option output 'ACCEPT'
-	option forward 'REJECT'
+	option forward 'DROP'
 	option masq '1'
+	option masq6 '1'
 	option mtu_fix '1'
 
-config forwarding
+config forwarding 'fw_lan_wan'
 	option src 'lan'
 	option dest 'wan'
 
@@ -119,10 +132,9 @@ config rule
 	option proto 'udp'
 	option target 'ACCEPT'
 
-config include
+config include 'fail2ban'
 	option path '/etc/firewall.fail2ban'
 	option enabled '1'
-	option reload '1'
 
 config zone 'docker'
 	option input 'ACCEPT'
@@ -136,6 +148,33 @@ config rule
 	option target 'ACCEPT'
 	option src 'wan'
 	option proto 'tcp'
-	option dest_port '5022 5035 5443'
+	option dest_port '1443 5022 5035 5443'
 	option name 'Allow-WAN-conf'
 
+config ipset 'tun2ray4'
+	option name 'tun2ray4'
+	option family 'ipv4'
+	list match 'dst_net'
+
+config ipset 'tun2ray6'
+	option name 'tun2ray6'
+	option family 'ipv6'
+	list match 'dst_net'
+
+config rule 'mark4_lan_tun2ray'
+	option name 'mark4_lan_tun2ray'
+	option src 'lan'
+	option dest '*'
+	option ipset 'tun2ray4'
+	option set_mark '0x333'
+	option target 'MARK'
+	list proto 'all'
+
+config rule 'mark6_lan_tun2ray'
+	option name 'mark6_lan_tun2ray'
+	option src 'lan'
+	option dest '*'
+	option ipset 'tun2ray6'
+	option set_mark '0x333'
+	option target 'MARK'
+	list proto 'all'

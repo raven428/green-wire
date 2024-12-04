@@ -42,7 +42,9 @@ chmod +x "$1/000-printenv.sh"
 /usr/bin/env cp -v root/.ssh/authorized_keys etc/dropbear/authorized_keys
 /usr/bin/env cp -v root/.terminfo/x/xterm-256color usr/share/terminfo/x/xterm-256color
 
-# sendmail link for fail2ban:
+# msmtp(q) preparation:
+/usr/bin/env ln -vsf /root/log log
+/usr/bin/env ln -vsf /root/.msmtp.queue .msmtp.queue
 /usr/bin/env ln -vsf /usr/bin/msmtpq usr/sbin/sendmail
 
 # patches:
@@ -53,7 +55,7 @@ done
 
 # system:
 /usr/bin/env cat <<EOF >etc/config/system
-config system
+config system 'main'
 	option hostname '${WRT_HOSTNAME}'
 	option timezone 'UTC'
 	option ttylogin '0'
@@ -71,6 +73,12 @@ config timeserver 'ntp'
 	list server '1.openwrt.pool.ntp.org'
 	list server '2.openwrt.pool.ntp.org'
 	list server '3.openwrt.pool.ntp.org'
+	list server '216.239.35.0'
+	list server '216.239.35.4'
+	list server '216.239.35.8'
+	list server '216.239.35.12'
+	list server '162.159.200.123'
+	list server '162.159.200.1'
 EOF
 
 # uhttpd:
@@ -129,7 +137,7 @@ config internal 'languages'
 
 config internal 'sauth'
 	option sessionpath '/tmp/luci-sessions'
-	option sessiontime '3600'
+	option sessiontime '1111111'
 
 config internal 'ccache'
 	option enable '1'
@@ -183,7 +191,7 @@ EOF
 
 # acme:
 /usr/bin/env cat <<EOF >etc/config/acme
-config acme
+config acme 'main'
 	option account_email 'r@${WRT_SECRET_TLD}'
 	option debug '0'
 
@@ -219,7 +227,143 @@ set_from_header on
 syslog LOG_MAIL
 EOF
 
-# prepare
+# dokodemo warp:
+warp_reg='/usr/bin/warp-reg'
+/usr/bin/env curl -Lm 111 -o "${warp_reg}" \
+  https://github.com/badafans/warp-reg/releases/download/v1.0/main-linux-amd64
+/usr/bin/env chmod -v 755 "${warp_reg}"
+count=0
+warp_regions='m tr cy kz ge de us ng cl bg it'
+reg_data="$(${warp_reg})"
+pvk="$(
+  # shellcheck disable=2016
+  /usr/bin/env printf "%s\n" "${reg_data}" |
+    /usr/bin/env awk '{ if ($1=="private_key:") print $2 }'
+)"
+ipv4="$(
+  # shellcheck disable=2016
+  /usr/bin/env printf "%s\n" "${reg_data}" |
+    /usr/bin/env awk '{ if ($1=="v4:") print $2 }'
+)"
+ipv6="$(
+  # shellcheck disable=2016
+  /usr/bin/env printf "%s\n" "${reg_data}" |
+    /usr/bin/env awk '{ if ($1=="v6:") print $2 }'
+)"
+if [[ -z "${pvk}" ]]; then
+  echo 'warp-reg failed…'
+  exit 1
+fi
+echo "ips v4[${ipv4}] v6[${ipv6}] generated"
+mtu='1420'
+for r in ${warp_regions}; do
+  [[ -e "etc/nftsets/vpn4_${r}.txt" ]] ||
+    cat <<EOF >>"etc/nftsets/vpn4_${r}.txt"
+# address blocks for [${r}] vpn region
+EOF
+  [[ -e "etc/nftsets/vpn6_${r}.txt" ]] ||
+    cat <<EOF >>"etc/nftsets/vpn6_${r}.txt"
+# address blocks for [${r}] vpn region
+EOF
+  port="$(/usr/bin/env printf '%03d' "$count")"
+  mark="$(/usr/bin/env printf '%02d' "$count")"
+  cat <<EOF >>etc/config/network
+
+config interface 'wgcf${r}'
+	option proto 'wireguard'
+	option private_key '${pvk}'
+	list addresses '172.16.0.2/32'
+	list addresses '${ipv6}/128'
+	option listen_port '12${port}'
+	option mtu '${mtu}'
+
+config wireguard_wgcf${r} 'wgserver${r}'
+	option description 'warp-${r}'
+	option public_key 'bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo='
+	option endpoint_host '127.0.0.1'
+	option endpoint_port '11${port}'
+	option persistent_keepalive '11'
+	option route_allowed_ips '0'
+	list allowed_ips '0.0.0.0/0'
+	list allowed_ips '::/0'
+
+config rule 'wgcf4ru_${r}'
+	option name 'mark-${r}'
+	option mark '0x1${mark}'
+	option priority '100'
+	option lookup 'vpn_${r}'
+
+config route 'wgcf4ro_${r}'
+	option name 'wgcf-${r}'
+	option interface 'wgcf${r}'
+	option table 'vpn_${r}'
+	option target '0.0.0.0/0'
+
+config rule6 'wgcf6ru_${r}'
+	option name 'mark-${r}'
+	option mark '0x1${mark}'
+	option priority '100'
+	option lookup 'vpn_${r}'
+
+config route6 'wgcf6ro_${r}'
+	option name 'wgcf-${r}'
+	option interface 'wgcf${r}'
+	option table 'vpn_${r}'
+	option target '::/0'
+EOF
+  cat <<EOF >>etc/config/firewall
+
+config ipset 'vpn4_${r}'
+	option name 'vpn4_${r}'
+	option family 'ipv4'
+	list match 'dst_net'
+	option loadfile '/etc/nftsets/vpn4_${r}.txt'
+
+config ipset 'vpn6_${r}'
+	option name 'vpn6_${r}'
+	option family 'ipv6'
+	list match 'dst_net'
+	option loadfile '/etc/nftsets/vpn6_${r}.txt'
+
+config rule 'mark4_lan_${r}'
+	option name 'mark4_lan_${r}'
+	option src 'lan'
+	option dest '*'
+	option ipset 'vpn4_${r}'
+	option set_mark '0x1${mark}'
+	option target 'MARK'
+	list proto 'all'
+
+config rule 'mark6_lan_${r}'
+	option name 'mark6_lan_${r}'
+	option src 'lan'
+	option dest '*'
+	option ipset 'vpn6_${r}'
+	option set_mark '0x1${mark}'
+	option target 'MARK'
+	list proto 'all'
+
+config rule 'mark4_int_${r}'
+	option name 'mark4_int_${r}'
+	option dest 'wan'
+	option ipset 'vpn4_${r}'
+	option set_mark '0x1${mark}'
+	option target 'MARK'
+	list proto 'all'
+
+config rule 'mark6_int_${r}'
+	option name 'mark6_int_${r}'
+	option dest 'wan'
+	option ipset 'vpn6_${r}'
+	option set_mark '0x1${mark}'
+	option target 'MARK'
+	list proto 'all'
+EOF
+  mtu='1300'
+  count=$((count + 1))
+done
+
+# hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
   /usr/bin/env mv -vf 'www/cgi-bin' "www/${WRT_LUCI_CGI}"
 [[ ${WRT_LUCI_STA} == 'luci-static' ]] ||

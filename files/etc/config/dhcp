@@ -1,5 +1,5 @@
 
-config dnsmasq
+config dnsmasq 'dnsmasq'
 	option domainneeded '1'
 	option boguspriv '0'
 	option filterwin2k '0'
@@ -9,7 +9,7 @@ config dnsmasq
 	option local '/lan/'
 	option domain 'lan'
 	option expandhosts '1'
-	option nonegcache '0'
+	option nonegcache '1'
 	option cachesize '1000'
 	option authoritative '1'
 	option readethers '1'
@@ -20,6 +20,9 @@ config dnsmasq
 	option ednspacket_max '1232'
 	option filter_aaaa '0'
 	option filter_a '0'
+	option noresolv '1'
+	option localuse '1'
+	option confdir '/etc/dnsmasq.d'
 
 config dhcp 'lan'
 	option interface 'lan'
@@ -32,6 +35,11 @@ config dhcp 'lan'
 	option ra_slaac '1'
 	list ra_flags 'managed-config'
 	list ra_flags 'other-config'
+	option ra_default '1'
+	list dhcp_option '42,192.168.77.112'  # ntp-servers
+	list dhcp_option '44,192.168.77.114'  # netbios-name-servers (WINS)
+	list dhcp_option '45,192.168.77.114'  # netbios-dd-server
+	list dhcp_option '46,8'               # netbios-node-type (8 = H-node)
 
 config dhcp 'wan'
 	option interface 'wan'
@@ -43,3 +51,74 @@ config odhcpd 'odhcpd'
 	option leasetrigger '/usr/sbin/odhcpd-update'
 	option loglevel '4'
 
+config ipset 'tun2ray'
+	option table_family 'inet'
+	list name 'tun2ray4'
+	list name 'tun2ray6'
+	list domain 'nonexistent1'
+
+config ipset 'vpn_m'
+	option table_family 'inet'
+	list name 'vpn4_m'
+	list name 'vpn6_m'
+	list domain 'nonexistent2'
+
+config ipset 'vpn_tr'
+	list domain 'tr'
+	option table_family 'inet'
+	list name 'vpn4_tr'
+	list name 'vpn6_tr'
+
+config ipset 'vpn_cy'
+	list domain 'cy'
+	option table_family 'inet'
+	list name 'vpn4_cy'
+	list name 'vpn6_cy'
+
+config ipset 'vpn_kz'
+	list domain 'kz'
+	option table_family 'inet'
+	list name 'vpn4_kz'
+	list name 'vpn6_kz'
+
+config ipset 'vpn_ge'
+	list domain 'ge'
+	option table_family 'inet'
+	list name 'vpn4_ge'
+	list name 'vpn6_ge'
+
+config ipset 'vpn_de'
+	list domain 'de'
+	option table_family 'inet'
+	list name 'vpn4_de'
+	list name 'vpn6_de'
+
+config ipset 'vpn_us'
+	list domain 'us'
+	option table_family 'inet'
+	list name 'vpn4_us'
+	list name 'vpn6_us'
+
+config ipset 'vpn_ng'
+	list domain 'ng'
+	option table_family 'inet'
+	list name 'vpn4_ng'
+	list name 'vpn6_ng'
+
+config ipset 'vpn_cl'
+	list domain 'cl'
+	option table_family 'inet'
+	list name 'vpn4_cl'
+	list name 'vpn6_cl'
+
+config ipset 'vpn_bg'
+	list domain 'bg'
+	option table_family 'inet'
+	list name 'vpn4_bg'
+	list name 'vpn6_bg'
+
+config ipset 'vpn_it'
+	list domain 'it'
+	option table_family 'inet'
+	list name 'vpn4_it'
+	list name 'vpn6_it'

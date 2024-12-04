@@ -3,6 +3,7 @@ set -ueo pipefail
 : "${XUI:="3x-ui"}"
 : "${XUIV:="${XUI}-2_4_5-arm64-static-musl"}"
 : "${XURI:="https://github.com/raven428/container-images/releases/download/000/${XUIV}.tar.xz"}"
+: 
 if [[ -n "${WRT_SET_PASSWD:-}" ]]; then
   /usr/bin/env printf "${WRT_SET_PASSWD}\n${WRT_SET_PASSWD}\n" |
     /usr/bin/env passwd

@@ -1,0 +1,28 @@
+--- etc/init.d/dnscrypt-proxy-orig 2024-09-23 12:34:46.000000000 +0000
++++ etc/init.d/dnscrypt-proxy 2024-12-19 06:39:41.602141031 +0000
+@@ -16,6 +16,9 @@
+         procd_set_param file "$CONFIGFILE"
+         procd_set_param stdout 1
+         procd_set_param stderr 1
+-        procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
++        procd_set_param respawn \
++          ${respawn_threshold:-333} \
++          ${respawn_timeout:-3} \
++          ${respawn_retry:-33}
+         procd_close_instance
+ }
+
+--- etc/init.d/stubby-orig 2024-09-23 12:34:46.000000000 +0000
++++ etc/init.d/stubby 2024-12-19 06:38:54.961736954 +0000
+@@ -248,7 +248,10 @@
+         if [ -n "$command_line_arguments" ]; then
+             procd_append_param command "$command_line_arguments"
+         fi
+-        procd_set_param respawn
++        procd_set_param respawn \
++          ${respawn_threshold:-333} \
++          ${respawn_timeout:-3} \
++          ${respawn_retry:-33}
+         procd_set_param file "$stubby_config"
+         procd_set_param stdout 1
+         procd_set_param stderr 1
