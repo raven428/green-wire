@@ -1,0 +1,24 @@
+#
+# reserved values
+#
+128	prelocal
+255	local
+254	main
+253	default
+0	unspec
+#
+# local
+#
+#1	inr.ruhep
+100 vpn_m
+101 vpn_tr
+102 vpn_cy
+103 vpn_kz
+104 vpn_ge
+105 vpn_de
+106 vpn_us
+107 vpn_ng
+108 vpn_cl
+109 vpn_bg
+110 vpn_it
+333 tun2ray
