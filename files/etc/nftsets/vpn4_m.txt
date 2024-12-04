@@ -1,0 +1,20 @@
+# https://github.com/RockBlack-VPN/ip-address
+# https://www.rockblack.su/vpn/dopolnitelno/diapazon-ip-adresov
+# https://gist.github.com/iamwildtuna/7772b7c84a11bf6e1385f23096a73a15
+
+# dns thru vpn
+1.0.0.1
+8.8.4.4
+149.112.112.112
+
+# https://github.com/blackmatrix7/ios_rule_script/blob/master/rule/Shadowrocket/YouTube/YouTube_Resolve.list
+216.73.80.0/20
+172.110.32.0/21
+
+# https://github.com/blackmatrix7/ios_rule_script/blob/master/rule/Shadowrocket/Twitter/Twitter_Resolve.list
+192.133.76.0/22
+199.59.148.0/22
+199.96.56.0/21
+202.160.128.0/22
+209.237.192.0/19
+69.195.160.0/19
