@@ -20,6 +20,7 @@ config zone
 	option output 'ACCEPT'
 	option forward 'REJECT'
 	option masq '1'
+	option masq6 '1'
 	option mtu_fix '1'
 
 config forwarding
@@ -136,6 +137,6 @@ config rule
 	option target 'ACCEPT'
 	option src 'wan'
 	option proto 'tcp'
-	option dest_port '5022 5035 5443'
+	option dest_port '1443 5022 5035 5443'
 	option name 'Allow-WAN-conf'
 

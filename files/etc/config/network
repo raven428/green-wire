@@ -11,6 +11,7 @@ config globals 'globals'
 config device
 	option name 'br-lan'
 	option type 'bridge'
+	option macaddr '36:07:b2:f1:59:d4'
 	list ports 'lan1'
 	list ports 'lan2'
 	list ports 'lan3'
@@ -20,15 +21,20 @@ config device
 config interface 'lan'
 	option device 'br-lan'
 	option proto 'static'
-	option ipaddr '192.168.1.1'
+	option ipaddr '192.168.69.1'
 	option netmask '255.255.255.0'
 	option ip6assign '60'
 
 config device
 	option name 'br-wan'
 	option type 'bridge'
+	option macaddr 'be:e5:a4:60:7b:13'
 	list ports 'eth1'
 	list ports 'wan'
+
+config device
+	option name 'eth0'
+	option macaddr '36:07:b2:f1:59:d4'
 
 config device
 	option name 'eth1'
@@ -38,6 +44,26 @@ config device
 	option name 'wan'
 	option macaddr 'be:e5:a4:60:7b:13'
 
+config device
+	option name 'lan1'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device
+	option name 'lan2'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device
+	option name 'lan3'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device
+	option name 'lan4'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device
+	option name 'sfp2'
+	option macaddr '36:07:b2:f1:59:d4'
+
 config interface 'wan'
 	option device 'br-wan'
 	option proto 'dhcp'
@@ -45,6 +71,11 @@ config interface 'wan'
 config interface 'wan6'
 	option device 'br-wan'
 	option proto 'dhcpv6'
+
+config route6
+	option name 'ipv6def'
+	option interface 'wgcfm'
+	option target '::/0'
 
 config interface 'docker'
 	option device 'docker0'
@@ -54,4 +85,3 @@ config interface 'docker'
 config device
 	option type 'bridge'
 	option name 'docker0'
-
