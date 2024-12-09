@@ -1,6 +1,5 @@
 
-config dropbear
+config dropbear 'config'
 	option PasswordAuth 'off'
 	option RootPasswordAuth 'off'
 	option Port '5022'
-
