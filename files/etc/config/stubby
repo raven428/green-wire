@@ -1,0 +1,3 @@
+config stubby 'global'
+	option manual '1'
+	option trigger 'timed'
