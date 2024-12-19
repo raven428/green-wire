@@ -1,0 +1,4 @@
+# bypass some nets ipv4
+
+# test:
+#192.168.69.19/32
