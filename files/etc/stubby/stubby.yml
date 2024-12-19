@@ -1,0 +1,26 @@
+# Note: by default on OpenWRT stubby configuration is handled via
+# the UCI system and the file /etc/config/stubby. If you want to
+# use this file to configure stubby, then set "option manual '1'"
+# in /etc/config/stubby.
+log_level: GETDNS_LOG_INFO
+resolution_type: GETDNS_RESOLUTION_STUB
+round_robin_upstreams: 1
+appdata_dir: "/var/lib/stubby"
+tls_authentication: GETDNS_AUTHENTICATION_NONE
+tls_query_padding_blocksize: 128
+edns_client_subnet_private: 1
+idle_timeout: 10000
+listen_addresses:
+  - 127.0.0.1@5453
+  - 0::1@5453
+dns_transport_list:
+  - GETDNS_TRANSPORT_TLS
+upstream_recursive_servers:
+  - address_data: 2603:c020:8006:9211:53::53
+  - address_data: 2603:c020:800c:ebeb:53::53
+  - address_data: 109.91.184.21
+  - address_data: 213.202.211.221
+  - address_data: 194.36.144.87
+  - address_data: 66.103.201.196
+  - address_data: 204.12.237.197
+  - address_data: 173.208.212.205

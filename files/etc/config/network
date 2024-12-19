@@ -8,9 +8,10 @@ config interface 'loopback'
 config globals 'globals'
 	option ula_prefix 'fddc:1df3:9d1a::/48'
 
-config device
+config device 'br_lan'
 	option name 'br-lan'
 	option type 'bridge'
+	option macaddr '36:07:b2:f1:59:d4'
 	list ports 'lan1'
 	list ports 'lan2'
 	list ports 'lan3'
@@ -20,38 +21,97 @@ config device
 config interface 'lan'
 	option device 'br-lan'
 	option proto 'static'
-	option ipaddr '192.168.1.1'
+	option ipaddr '192.168.69.1'
 	option netmask '255.255.255.0'
 	option ip6assign '60'
 
-config device
+config device 'br_wan'
 	option name 'br-wan'
 	option type 'bridge'
+	option macaddr 'be:e5:a4:60:7b:13'
 	list ports 'eth1'
 	list ports 'wan'
 
-config device
+config device 'eth0'
+	option name 'eth0'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device 'eth1'
 	option name 'eth1'
 	option macaddr 'be:e5:a4:60:7b:13'
 
-config device
+config device 'wan'
 	option name 'wan'
 	option macaddr 'be:e5:a4:60:7b:13'
 
-config interface 'wan'
+config device 'lan1'
+	option name 'lan1'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device 'lan2'
+	option name 'lan2'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device 'lan3'
+	option name 'lan3'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device 'lan4'
+	option name 'lan4'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config device 'sfp2'
+	option name 'sfp2'
+	option macaddr '36:07:b2:f1:59:d4'
+
+config interface 'wan4'
 	option device 'br-wan'
 	option proto 'dhcp'
+	option peerdns '0'
 
 config interface 'wan6'
 	option device 'br-wan'
 	option proto 'dhcpv6'
+	option peerdns '0'
+
+config route6 'ipv6def'
+	option name 'ipv6def'
+	option interface 'wgcfm'
+	option target '::/0'
+
+config interface 'tun2ray'
+	option device 'tun2ray'
+	option proto 'none'
+
+config rule 'tun2ray_ru4'
+	option name 'tun2ray'
+	option mark '0x333'
+	option priority '100'
+	option lookup 'tun2ray'
+
+config route 'tun2ray_ro4'
+	option name 'tun2ray'
+	option interface 'tun2ray'
+	option table 'tun2ray'
+	option target '0.0.0.0/0'
+
+config rule6 'tun2ray_ru6'
+	option name 'tun2ray'
+	option mark '0x333'
+	option priority '100'
+	option lookup 'tun2ray'
+
+config route6 'tun2ray_ro6'
+	option name 'tun2ray'
+	option interface 'tun2ray'
+	option table 'tun2ray'
+	option target '::/0'
 
 config interface 'docker'
 	option device 'docker0'
 	option proto 'none'
 	option auto '0'
 
-config device
+config device 'docker_bridge'
 	option type 'bridge'
 	option name 'docker0'
-
