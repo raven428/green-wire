@@ -14,6 +14,7 @@ export WRT_SMTP_PASSWD='${WRT_SMTP_PASSWD:-"smtp-relay-password"}'
 export WRT_HOSTNAME='${WRT_HOSTNAME:-"werter"}'
 export WRT_SECRET_TLD='${WRT_SECRET_TLD:-"domain.tld"}'
 export WRT_OPKG_REPO='${WRT_OPKG_REPO}'
+export WRT_LAN3OCT='${WRT_LAN3OCT:-"192.168.69"}'
 EOF
 for f in prepare/etc/dnsmasq.d/*.sets; do
   r="${f##*/}"

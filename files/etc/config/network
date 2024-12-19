@@ -74,18 +74,37 @@ config interface 'wan6'
 	option proto 'dhcpv6'
 	option peerdns '0'
 
-config route6 'ipv6def'
-	option name 'ipv6def'
-	option interface 'wgcfm'
-	option target '::/0'
-
 config interface 'tun2ray'
 	option device 'tun2ray'
 	option proto 'none'
 
+config rule 'byp_ru4'
+	option name 'byp'
+	option mark '0x199'
+	option priority '100'
+	option lookup 'byp4_m'
+
+config route 'byp_ro4'
+	option name 'byp'
+	option interface 'wan4'
+	option table 'byp_m'
+	option target '0.0.0.0/0'
+
+config rule6 'byp_ru6'
+	option name 'byp'
+	option mark '0x199'
+	option priority '100'
+	option lookup 'byp6_m'
+
+config route6 'byp_ro6'
+	option name 'byp'
+	option interface 'wan6'
+	option table 'byp_m'
+	option target '::/0'
+
 config rule 'tun2ray_ru4'
 	option name 'tun2ray'
-	option mark '0x333'
+	option mark '0x100'
 	option priority '100'
 	option lookup 'tun2ray'
 
@@ -97,7 +116,7 @@ config route 'tun2ray_ro4'
 
 config rule6 'tun2ray_ru6'
 	option name 'tun2ray'
-	option mark '0x333'
+	option mark '0x100'
 	option priority '100'
 	option lookup 'tun2ray'
 
