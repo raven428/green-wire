@@ -18,8 +18,19 @@ rm -fv "etc/secrets.sh"
 
 # crontab:
 /usr/bin/env cat <<EOF >>etc/crontabs/root
-0 */7 * * * /usr/bin/msmtpq --q-mgmt -r
+*/20 * * * * /usr/bin/msmtpq --q-mgmt -r
 EOF
+
+# add tld to search:
+/usr/bin/env sed -i \
+  "s/^\toption domain 'lan'$/\toption domain 'lan $WRT_SECRET_TLD'/" \
+	etc/config/dhcp
+
+# replace network 3 octets:
+/usr/bin/env sed -i \
+  "s/192.168.69/$WRT_LAN3OCT/" \
+	etc/config/network \
+	etc/config/dhcp
 
 # add hotplug debug log:
 # shellcheck disable=2016
@@ -362,6 +373,84 @@ EOF
   mtu='1300'
   count=$((count + 1))
 done
+  cat <<EOF >>etc/config/firewall
+
+config ipset 'tun2ray4'
+	option name 'tun2ray4'
+	option family 'ipv4'
+	list match 'dst_net'
+	option loadfile '/etc/nftsets/vpn4_m.txt'
+
+config ipset 'tun2ray6'
+	option name 'tun2ray6'
+	option family 'ipv6'
+	list match 'dst_net'
+	option loadfile '/etc/nftsets/vpn6_m.txt'
+
+config rule 'mark4_lan_tun2ray'
+	option name 'mark4_lan_tun2ray'
+	option src 'lan'
+	option dest '*'
+	option ipset 'tun2ray4'
+	option set_mark '0x100'
+	option target 'MARK'
+	list proto 'all'
+
+config rule 'mark6_lan_tun2ray'
+	option name 'mark6_lan_tun2ray'
+	option src 'lan'
+	option dest '*'
+	option ipset 'tun2ray6'
+	option set_mark '0x100'
+	option target 'MARK'
+	list proto 'all'
+
+config ipset 'byp4_m'
+	option name 'byp4_m'
+	option family 'ipv4'
+	list match 'src_net'
+	option loadfile '/etc/nftsets/byp4_m.txt'
+
+config ipset 'byp6_m'
+	option name 'byp6_m'
+	option family 'ipv6'
+	list match 'src_net'
+	option loadfile '/etc/nftsets/byp6_m.txt'
+
+config rule 'mark4_byp_m'
+	option name 'mark4_byp_m'
+	option src 'lan'
+	option dest '*'
+	option ipset 'byp4_m'
+	option set_mark '0x199'
+	option target 'MARK'
+	list proto 'all'
+
+config rule 'mark6_byp_m'
+	option name 'mark6_byp_m'
+	option src 'lan'
+	option dest '*'
+	option ipset 'byp6_m'
+	option set_mark '0x199'
+	option target 'MARK'
+	list proto 'all'
+
+config ipset 'src4_m'
+	option name 'src4_m'
+	option family 'ipv4'
+	list match 'src_net'
+	option loadfile '/etc/nftsets/src4_m.txt'
+
+config rule 'mark4_src_m'
+	option name 'mark4_src_m'
+	option src 'lan'
+	option dest '*'
+	option ipset 'src4_m'
+	option set_mark '0x100'
+	option target 'MARK'
+	list proto 'all'
+EOF
+
 
 # hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
