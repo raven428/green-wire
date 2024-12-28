@@ -65,6 +65,10 @@ config include 'fail2ban'
 	option path '/etc/firewall.fail2ban'
 	option enabled '1'
 
+config include '3x_ui'
+	option path '/etc/firewall.3x-ui'
+	option enabled '1'
+
 config zone 'docker'
 	option input 'ACCEPT'
 	option output 'ACCEPT'

@@ -1,0 +1,3 @@
+#!/bin/sh
+/etc/init.d/3x-ui enabled && /etc/init.d/3x-ui restart
+exit 0
