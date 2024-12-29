@@ -23,12 +23,12 @@ EOF
 
 # add tld to search:
 /usr/bin/env sed -i \
-  "s/^\toption domain 'lan'$/\toption domain 'lan $WRT_SECRET_TLD'/" \
+  "s/^\toption domain 'lan'$/\toption domain 'lan ${WRT_SECRET_TLD}'/" \
 	etc/config/dhcp
 
 # replace network 3 octets:
 /usr/bin/env sed -i \
-  "s/192.168.69/$WRT_LAN3OCT/" \
+  "s/192.168.69/${WRT_LAN3OCT}/" \
 	etc/config/network \
 	etc/config/dhcp
 
@@ -243,8 +243,6 @@ warp_reg='/usr/bin/warp-reg'
 /usr/bin/env curl -Lm 111 -o "${warp_reg}" \
   https://github.com/badafans/warp-reg/releases/download/v1.0/main-linux-amd64
 /usr/bin/env chmod -v 755 "${warp_reg}"
-count=0
-warp_regions='m tr cy kz ge de us ng cl bg it'
 reg_data="$(${warp_reg})"
 pvk="$(
   # shellcheck disable=2016
@@ -266,19 +264,23 @@ if [[ -z "${pvk}" ]]; then
   exit 1
 fi
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
-mtu='1420'
+count=0
+mtu='1300'
+warp_regions='tr cy kz ge de us ng cl bg it ar uy se nl cz m'
 for r in ${warp_regions}; do
+  count=$((count + 1))
+  [[ "$r" == "m" ]] && count=0 && mtu='1420'
   [[ -e "etc/nftsets/vpn4_${r}.txt" ]] ||
-    cat <<EOF >>"etc/nftsets/vpn4_${r}.txt"
+    /usr/bin/env cat <<EOF >>"etc/nftsets/vpn4_${r}.txt"
 # address blocks for [${r}] vpn region
 EOF
   [[ -e "etc/nftsets/vpn6_${r}.txt" ]] ||
-    cat <<EOF >>"etc/nftsets/vpn6_${r}.txt"
+    /usr/bin/env cat <<EOF >>"etc/nftsets/vpn6_${r}.txt"
 # address blocks for [${r}] vpn region
 EOF
   port="$(/usr/bin/env printf '%03d' "$count")"
   mark="$(/usr/bin/env printf '%02d' "$count")"
-  cat <<EOF >>etc/config/network
+  /usr/bin/env cat <<EOF >>etc/config/network
 
 config interface 'wgcf${r}'
 	option proto 'wireguard'
@@ -322,7 +324,7 @@ config route6 'wgcf6ro_${r}'
 	option table 'vpn_${r}'
 	option target '::/0'
 EOF
-  cat <<EOF >>etc/config/firewall
+  /usr/bin/env cat <<EOF >>etc/config/firewall
 
 config ipset 'vpn4_${r}'
 	option name 'vpn4_${r}'
@@ -370,22 +372,34 @@ config rule 'mark6_int_${r}'
 	option target 'MARK'
 	list proto 'all'
 EOF
-  mtu='1300'
-  count=$((count + 1))
+  domain="${r}"
+	[[ ${r} == 'm' ]] && domain='main_nonexistent_domain'
+	/usr/bin/env cat <<EOF >>etc/config/dhcp
+
+config ipset 'vpn_${r}'
+	list domain '${domain}'
+	option table_family 'inet'
+	list name 'vpn4_${r}'
+	list name 'vpn6_${r}'
+	# list name 'tun2ray4'
+	# list name 'tun2ray6'
+	# list name 'tproxy4'
+	# list name 'tproxy6'
+EOF
 done
-  cat <<EOF >>etc/config/firewall
+  /usr/bin/env cat <<EOF >>etc/config/firewall
 
 config ipset 'tun2ray4'
 	option name 'tun2ray4'
 	option family 'ipv4'
 	list match 'dst_net'
-	option loadfile '/etc/nftsets/vpn4_m.txt'
+	# option loadfile '/etc/nftsets/vpn4_m.txt'
 
 config ipset 'tun2ray6'
 	option name 'tun2ray6'
 	option family 'ipv6'
 	list match 'dst_net'
-	option loadfile '/etc/nftsets/vpn6_m.txt'
+	# option loadfile '/etc/nftsets/vpn6_m.txt'
 
 config rule 'mark4_lan_tun2ray'
 	option name 'mark4_lan_tun2ray'
@@ -451,6 +465,14 @@ config rule 'mark4_src_m'
 	list proto 'all'
 EOF
 
+# resolf.conf
+  /usr/bin/env ls -la etc/resolv.conf
+	/usr/bin/env rm -fv etc/resolv.conf
+  /usr/bin/env cat <<EOF >>etc/resolv.conf
+search lan local localdomain ${WRT_SECRET_TLD} home.${WRT_SECRET_TLD}
+nameserver 127.0.0.1
+nameserver ::1
+EOF
 
 # hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
@@ -458,3 +480,6 @@ EOF
 [[ ${WRT_LUCI_STA} == 'luci-static' ]] ||
   /usr/bin/env mv -vf 'www/luci-static' "www/${WRT_LUCI_STA}"
 /usr/bin/env rm -rfv etc/x-ui
+
+# copy for observation
+cp -rv etc /builder/bin/targets/mediatek/filogic
