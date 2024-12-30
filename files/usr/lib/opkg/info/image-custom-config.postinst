@@ -23,7 +23,7 @@ EOF
 
 # add tld to search:
 /usr/bin/env sed -i \
-  "s/^\toption domain 'lan'$/\toption domain 'lan ${WRT_SECRET_TLD}'/" \
+  "s/^\toption domain 'lan'$/\toption domain 'lan'/" \
 	etc/config/dhcp
 
 # replace network 3 octets:
@@ -264,9 +264,14 @@ if [[ -z "${pvk}" ]]; then
   exit 1
 fi
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
+warp_regions='tr cy kz ge de us ng cl bg it ar uy se nl cz m'
+for r in ${warp_regions}; do
+  /usr/bin/env cat <<EOF >>etc/config/firewall
+	list network 'wgcf${r}'
+EOF
+done
 count=0
 mtu='1300'
-warp_regions='tr cy kz ge de us ng cl bg it ar uy se nl cz m'
 for r in ${warp_regions}; do
   count=$((count + 1))
   [[ "$r" == "m" ]] && count=0 && mtu='1420'
