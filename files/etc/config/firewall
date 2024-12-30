@@ -61,6 +61,16 @@ config rule
 	option dest_port '1443 5022 5035 5443'
 	option name 'Allow-WAN-conf'
 
+config redirect 'transmission'
+	option dest 'lan'
+	option target 'DNAT'
+	option name 'transmission'
+	option src 'wan'
+	option src_dport '11000-11110'
+	option dest_ip '192.168.77.114'
+	option dest_port '11000-11110'
+	option family 'ipv4'
+
 config zone 'zone_wan'
 	option name 'wan'
 	option input 'DROP'
