@@ -50,10 +50,3 @@ config odhcpd 'odhcpd'
 	option leasefile '/tmp/hosts/odhcpd'
 	option leasetrigger '/usr/sbin/odhcpd-update'
 	option loglevel '4'
-
-config host
-	option name 'xps7590l1'
-	option ip '192.168.69.19'
-	option mac 'D4:81:D7:B9:35:59'
-	option dns '1'
-	option leasetime 'infinite'

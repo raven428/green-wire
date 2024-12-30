@@ -514,6 +514,31 @@ config wifi-iface 'default_radio1'
 	option key '${WRT_WIFI_KEY}'
 EOF
 
+# shellcheck disable=2086
+IFS=',' read -ra array <<< "$(echo -n ${WRT_CLIENTS})"
+for c in "${array[@]}"; do
+  name="${c%@*}"
+  name="${name#"${name%%[![:space:]]*}"}"
+  name="${name%"${name##*[![:space:]]}"}"
+  temp="${c#*@}"
+  mac="${temp%#*}"
+  mac="${mac#"${mac%%[![:space:]]*}"}"
+  mac="${mac%"${mac##*[![:space:]]}"}"
+  num="${c##*#}"
+  num="${num#"${num%%[![:space:]]*}"}"
+  num="${num%"${num##*[![:space:]]}"}"
+  echo "name: [${name}], mac: [${mac}], num: [${num}]"
+	/usr/bin/env cat <<EOF >>etc/config/dhcp
+
+config host
+	option name '${name}'
+	option ip '${WRT_LAN3OCT}.${num}'
+	option mac '${mac}'
+	option dns '1'
+	option leasetime 'infinite'
+EOF
+done
+
 # hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
   /usr/bin/env mv -vf 'www/cgi-bin' "www/${WRT_LUCI_CGI}"
