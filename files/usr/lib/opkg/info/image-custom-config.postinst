@@ -479,6 +479,41 @@ nameserver 127.0.0.1
 nameserver ::1
 EOF
 
+  /usr/bin/env cat <<EOF >>etc/config/wireless
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option path 'platform/soc/18000000.wifi'
+	option channel 'auto'
+	option band '2g'
+	option htmode 'HE20'
+	option cell_density '0'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid '${WRT_WIFI_SSID}2'
+	option encryption 'sae-mixed'
+	option key '${WRT_WIFI_KEY}'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option path 'platform/soc/18000000.wifi+1'
+	option channel 'auto'
+	option band '5g'
+	option htmode 'HE40'
+	option cell_density '0'
+
+config wifi-iface 'default_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid '${WRT_WIFI_SSID}5'
+	option encryption 'sae-mixed'
+	option key '${WRT_WIFI_KEY}'
+EOF
+
 # hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
   /usr/bin/env mv -vf 'www/cgi-bin' "www/${WRT_LUCI_CGI}"

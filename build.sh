@@ -3,7 +3,7 @@ set -ueo pipefail
 : "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
 /usr/bin/env cp -r files prepare
 /usr/bin/env cat <<EOF >prepare/etc/secrets.sh
-export WRT_ROOT_PASSWD='${WRT_DEF_PASSWD:-"luci-root-passwd"}'
+export WRT_ROOT_PASSWD='${WRT_DEF_PASSWD:-"luc1-r00t+pa5Swd"}'
 export WRT_LUCI_CGI='${WRT_LUCI_CGI:-"cgi-bin"}'
 export WRT_LUCI_STA='${WRT_LUCI_STA:-"luci-static"}'
 export WRT_CLOFA_TO='${WRT_CLOFA_TO:-"cloudflare-token-for-ddns"}'
@@ -15,6 +15,8 @@ export WRT_HOSTNAME='${WRT_HOSTNAME:-"werter"}'
 export WRT_SECRET_TLD='${WRT_SECRET_TLD:-"domain.tld"}'
 export WRT_OPKG_REPO='${WRT_OPKG_REPO}'
 export WRT_LAN3OCT='${WRT_LAN3OCT:-"192.168.69"}'
+export WRT_WIFI_SSID='${WRT_WIFI_SSID:-"werter"}'
+export WRT_WIFI_KEY='${WRT_WIFI_KEY:-"d3fAu1t!w1F1-ke4"}'
 EOF
 for f in prepare/etc/dnsmasq.d/*.sets; do
   r="${f##*/}"
