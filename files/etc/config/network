@@ -28,7 +28,7 @@ config interface 'lan'
 config device 'br_wan'
 	option name 'br-wan'
 	option type 'bridge'
-	option macaddr 'be:e5:a4:60:7b:13'
+	option macaddr '00:0c:29:be:03:b2'
 	list ports 'eth1'
 	list ports 'wan'
 
@@ -38,11 +38,11 @@ config device 'eth0'
 
 config device 'eth1'
 	option name 'eth1'
-	option macaddr 'be:e5:a4:60:7b:13'
+	option macaddr '00:0c:29:be:03:b2'
 
 config device 'wan'
 	option name 'wan'
-	option macaddr 'be:e5:a4:60:7b:13'
+	option macaddr '00:0c:29:be:03:b2'
 
 config device 'lan1'
 	option name 'lan1'
