@@ -11,3 +11,10 @@ config firewall 'firewall'
 	option device 'docker0'
 	list blocked_interfaces 'wan'
 
+config firewall 'firewall4'
+	option device 'docker0'
+	list blocked_interfaces 'wan4'
+
+config firewall 'firewall6'
+	option device 'docker0'
+	list blocked_interfaces 'wan6'
