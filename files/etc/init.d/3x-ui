@@ -13,7 +13,7 @@ chain_add() {
     nft "add chain inet fw4 ${CHAIN} { \
     type filter hook prerouting priority mangle+10; policy accept; \
   }"
-  nft "add rule inet fw4 ${CHAIN} iifname \"br-lan\" meta l4proto { tcp, udp } \
+  nft "add rule inet fw4 ${CHAIN} iifname \"br-lan.77\" meta l4proto { tcp, udp } \
   meta mark 0x100-0x115 counter meta mark set ${MARK} ${TABLE} ip to 127.0.0.1:10199"
   ip rule add fwmark ${MARK} table ${TABLE} priority 100
   ip route add local 0.0.0.0/0 dev lo table ${TABLE}

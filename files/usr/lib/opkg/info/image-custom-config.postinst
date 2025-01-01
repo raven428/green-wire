@@ -23,7 +23,7 @@ EOF
 
 # add tld to search:
 /usr/bin/env sed -i \
-  "s/^\toption domain 'lan'$/\toption domain 'lan ${WRT_SECRET_TLD}'/" \
+  "s/^\toption domain 'lan'$/\toption domain 'lan'/" \
 	etc/config/dhcp
 
 # replace network 3 octets:
@@ -185,9 +185,9 @@ config service 'cloudflare'
 	option domain '${WRT_HOSTNAME}@${WRT_SECRET_TLD}'
 	option username 'Bearer'
 	option password '${WRT_CLOFA_TO}'
-	option interface 'wan'
+	option interface 'wan4'
 	option ip_source 'network'
-	option ip_network 'wan'
+	option ip_network 'wan4'
 	option enabled '1'
 	option use_ipv6 '0'
 	option use_syslog '1'
@@ -264,9 +264,14 @@ if [[ -z "${pvk}" ]]; then
   exit 1
 fi
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
+warp_regions='tr cy kz ge de us ng cl bg it ar uy se nl cz m'
+for r in ${warp_regions}; do
+  /usr/bin/env cat <<EOF >>etc/config/firewall
+	list network 'wgcf${r}'
+EOF
+done
 count=0
 mtu='1300'
-warp_regions='tr cy kz ge de us ng cl bg it ar uy se nl cz m'
 for r in ${warp_regions}; do
   count=$((count + 1))
   [[ "$r" == "m" ]] && count=0 && mtu='1420'
@@ -473,6 +478,66 @@ search lan local localdomain ${WRT_SECRET_TLD} home.${WRT_SECRET_TLD}
 nameserver 127.0.0.1
 nameserver ::1
 EOF
+
+  /usr/bin/env cat <<EOF >>etc/config/wireless
+
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option path 'platform/soc/18000000.wifi'
+	option channel 'auto'
+	option band '2g'
+	option htmode 'HE20'
+	option cell_density '0'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid '${WRT_WIFI_SSID}2'
+	option encryption 'sae-mixed'
+	option key '${WRT_WIFI_KEY}'
+
+config wifi-device 'radio1'
+	option type 'mac80211'
+	option path 'platform/soc/18000000.wifi+1'
+	option channel 'auto'
+	option band '5g'
+	option htmode 'HE40'
+	option cell_density '0'
+
+config wifi-iface 'default_radio1'
+	option device 'radio1'
+	option network 'lan'
+	option mode 'ap'
+	option ssid '${WRT_WIFI_SSID}5'
+	option encryption 'sae-mixed'
+	option key '${WRT_WIFI_KEY}'
+EOF
+
+# shellcheck disable=2086
+IFS=',' read -ra array <<< "$(echo -n ${WRT_CLIENTS})"
+for c in "${array[@]}"; do
+  name="${c%@*}"
+  name="${name#"${name%%[![:space:]]*}"}"
+  name="${name%"${name##*[![:space:]]}"}"
+  temp="${c#*@}"
+  mac="${temp%#*}"
+  mac="${mac#"${mac%%[![:space:]]*}"}"
+  mac="${mac%"${mac##*[![:space:]]}"}"
+  num="${c##*#}"
+  num="${num#"${num%%[![:space:]]*}"}"
+  num="${num%"${num##*[![:space:]]}"}"
+  echo "name: [${name}], mac: [${mac}], num: [${num}]"
+	/usr/bin/env cat <<EOF >>etc/config/dhcp
+
+config host
+	option name '${name}'
+	option ip '${WRT_LAN3OCT}.${num}'
+	option mac '${mac}'
+	option dns '1'
+	option leasetime 'infinite'
+EOF
+done
 
 # hide luci:
 [[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
