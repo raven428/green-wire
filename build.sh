@@ -17,7 +17,7 @@ export WRT_OPKG_REPO='${WRT_OPKG_REPO}'
 export WRT_LAN3OCT='${WRT_LAN3OCT:-"192.168.69"}'
 export WRT_WIFI_SSID='${WRT_WIFI_SSID:-"werter"}'
 export WRT_WIFI_KEY='${WRT_WIFI_KEY:-"d3fAu1t!w1F1-ke4"}'
-export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1
+export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
 dir300@00:21:91:31:98:60#99"}'
 EOF
 for f in prepare/etc/dnsmasq.d/*.sets; do
