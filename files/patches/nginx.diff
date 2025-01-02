@@ -1,0 +1,14 @@
+--- etc/init.d/nginx-orig	2024-09-23 12:34:46.000000000 +0000
++++ etc/init.d/nginx	2025-01-03 12:56:19.000000000 +0000
+@@ -85,7 +85,10 @@
+ 	procd_set_param stderr 1
+ 	procd_set_param file "${CONF}" "${CONF_DIR}*.crt" "${CONF_DIR}*.key" \
+ 		"${CONF_DIR}*.conf" "${CONF_DIR}*.locations"
+-	procd_set_param respawn
++	procd_set_param respawn \
++		${respawn_threshold:-333} \
++		${respawn_timeout:-3} \
++		${respawn_retry:-33}
+ 	procd_close_instance
+ }
+ 
