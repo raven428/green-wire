@@ -12,7 +12,7 @@
   green-wire && cd green-wire
   ```
 
-* set [secrets for `build.sh`](/build.sh#L6-L21)
+* set [secrets for `build.sh`](/build.sh#L6-L22)
 * build images
 
   ```bash
