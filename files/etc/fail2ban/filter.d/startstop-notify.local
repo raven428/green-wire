@@ -1,0 +1,3 @@
+# dummy filter for start/stop notifier
+[Definition]
+failregex = nonexistent <HOST>
