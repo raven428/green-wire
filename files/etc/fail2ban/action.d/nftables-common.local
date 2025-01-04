@@ -1,0 +1,3 @@
+# Example with interface exclusion. Disabled in favor of ignoreip.
+#[Definition]
+#rule_stat = %(match)s iifname != "br-lan.77" <addr_family> saddr @<addr_set> <blocktype>

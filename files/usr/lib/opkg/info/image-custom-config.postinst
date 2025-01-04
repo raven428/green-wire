@@ -100,10 +100,10 @@ config uhttpd 'main'
 	option rfc1918_filter '1'
 	option max_requests '3'
 	option max_connections '100'
-	option cert '/etc/ssl/acme/${WRT_SECRET_TLD}.fullchain.crt'
-	option key '/etc/ssl/acme/${WRT_SECRET_TLD}.key'
-	option cgi_prefix '/${WRT_LUCI_CGI}'
-	option lua_prefix '/${WRT_LUCI_CGI}/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'
+	option cert '/etc/ssl/private/main.crt'
+	option key '/etc/ssl/private/main.key'
+	option cgi_prefix '/luci-cgi-${WRT_LUCI_CGI}'
+	option lua_prefix '/luci-cgi-${WRT_LUCI_CGI}/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'
 	option script_timeout '60'
 	option network_timeout '30'
 	option http_keepalive '20'
@@ -131,8 +131,8 @@ EOF
 /usr/bin/env cat <<EOF >etc/config/luci
 config core 'main'
 	option lang 'auto'
-	option mediaurlbase '/${WRT_LUCI_STA}/bootstrap'
-	option resourcebase '/${WRT_LUCI_STA}/resources'
+	option mediaurlbase '/luci-sta-${WRT_LUCI_STA}/bootstrap'
+	option resourcebase '/luci-sta-${WRT_LUCI_STA}/resources'
 	option ubuspath '/ubus/'
 
 config extern 'flash_keep'
@@ -154,9 +154,9 @@ config internal 'ccache'
 	option enable '1'
 
 config internal 'themes'
-	option Bootstrap '/${WRT_LUCI_STA}/bootstrap'
-	option BootstrapDark '/${WRT_LUCI_STA}/bootstrap-dark'
-	option BootstrapLight '/${WRT_LUCI_STA}/bootstrap-light'
+	option Bootstrap '/luci-sta-${WRT_LUCI_STA}/bootstrap'
+	option BootstrapDark '/luci-sta-${WRT_LUCI_STA}/bootstrap-dark'
+	option BootstrapLight '/luci-sta-${WRT_LUCI_STA}/bootstrap-light'
 
 config internal 'apply'
 	option rollback '90'
@@ -540,11 +540,8 @@ EOF
 done
 
 # hide luci:
-[[ ${WRT_LUCI_CGI} == 'cgi-bin' ]] ||
-  /usr/bin/env mv -vf 'www/cgi-bin' "www/${WRT_LUCI_CGI}"
-[[ ${WRT_LUCI_STA} == 'luci-static' ]] ||
-  /usr/bin/env mv -vf 'www/luci-static' "www/${WRT_LUCI_STA}"
-/usr/bin/env rm -rfv etc/x-ui
+/usr/bin/env mv -vf 'www/cgi-bin' "www/luci-cgi-${WRT_LUCI_CGI}"
+/usr/bin/env mv -vf 'www/luci-static' "www/luci-sta-${WRT_LUCI_STA}"
 
 # copy for observation
 cp -rv etc /builder/bin/targets/mediatek/filogic

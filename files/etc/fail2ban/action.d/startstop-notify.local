@@ -1,0 +1,15 @@
+# custom mail messages
+[INCLUDES]
+before = sendmail-common.conf
+[Definition]
+actionstart = printf %%b "Subject: at [<fq-hostname>] started [<name>] jail [$(date '+%%Y-%%m-%%dT%%H:%%M:%%S')] by
+              Date: $(LC_ALL=C date +"%%a, %%d %%h %%Y %%T %%z")
+              From: <sendername> <<sender>>
+              To: <dest>\n
+              Fail2ban at [<fq-hostname>] has been started successfully:
+              $(fail2ban-client status 2>&1)" | <mailcmd>
+actionstop = printf %%b "Subject: at [<fq-hostname>] stopped [<name>] jail [$(date '+%%Y-%%m-%%dT%%H:%%M:%%S')] by
+             Date: $(LC_ALL=C date +"%%a, %%d %%h %%Y %%T %%z")
+             From: <sendername> <<sender>>
+             To: <dest>\n
+             Fail2ban at [<fq-hostname>] has been stopped" | <mailcmd>
