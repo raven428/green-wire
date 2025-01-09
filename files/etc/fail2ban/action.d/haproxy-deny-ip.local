@@ -1,10 +1,8 @@
 # nginx deny
 [Definition]
-srv_cfg_path = /etc/nginx/
-srv_cmd = nginx
-blck_lst_reload = %(srv_cmd)s -qt; if [ $? -eq 0 ]; then
-                    %(srv_cmd)s -s reload; if [ $? -ne 0 ]; then echo 'reload failed.'; fi;
-                  fi;
+srv_cfg_path = /etc/haproxy
+srv_cmd = /etc/init.d/haproxy
+blck_lst_reload = %(srv_cmd)s restart
 blck_lst_name = fail2ban.map
 blck_lst_file = %(srv_cfg_path)s/%(blck_lst_name)s
 actionstart_on_demand = false
@@ -12,6 +10,6 @@ actionstart = touch '%(blck_lst_file)s'
 actionflush = truncate -s 0 '%(blck_lst_file)s'; %(blck_lst_reload)s
 actionstop = %(actionflush)s
 actioncheck =
-_echo_blck_row = printf 'deny %%s;' "<ip>"
+_echo_blck_row = printf '%%s' "<ip>"
 actionban = echo $(%(_echo_blck_row)s) >> '%(blck_lst_file)s'; %(blck_lst_reload)s
 actionunban = sed -i "\#^$(%(_echo_blck_row)s)\$#d" '%(blck_lst_file)s'; %(blck_lst_reload)s

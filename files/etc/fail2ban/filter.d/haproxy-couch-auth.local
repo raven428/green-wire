@@ -1,0 +1,3 @@
+# fail2ban filter configuration for luci haproxy auth
+[Definition]
+failregex = .+ haproxy\[\d+\]: yau\.REPLACE_secret_tld_REPLACE\:?[^\s]* <HOST> .+ "[^\s]+ \/REPLACE_couch_uri_REPLACE\/?[^\s]* HTTP\/.+ 401 .+

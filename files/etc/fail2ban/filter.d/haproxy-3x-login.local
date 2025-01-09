@@ -1,0 +1,3 @@
+# fail2ban filter configuration for 3x-ui haproxy auth
+[Definition]
+failregex = .+ haproxy\[\d+\]: .+ <HOST> .+ "POST \/3x-ui-[^\/]+\/login\/? HTTP\/.+ 200 .+
