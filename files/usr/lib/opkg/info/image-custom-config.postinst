@@ -21,16 +21,29 @@ rm -fv "etc/secrets.sh"
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
 EOF
 
-# add tld to search:
-/usr/bin/env sed -i \
-  "s/^\toption domain 'lan'$/\toption domain 'lan'/" \
-	etc/config/dhcp
-
 # replace network 3 octets:
 /usr/bin/env sed -i \
   "s/192.168.69/${WRT_LAN3OCT}/" \
 	etc/config/network \
 	etc/config/dhcp
+
+/usr/bin/env sed -i \
+  "
+    s/REPLACE_hostname_REPLACE/${WRT_HOSTNAME}/ ;
+    s/REPLACE_SMTP_host_REPLACE/${WRT_SMTP_HOST}/ ;
+    s/REPLACE_SMTP_login_REPLACE/${WRT_SMTP_LOGIN}/ ;
+    s/REPLACE_SMTP_passwd_REPLACE/${WRT_SMTP_PASSWD}/ ;
+    s/REPLACE_secret_tld_REPLACE/${WRT_SECRET_TLD}/ ;
+    s/REPLACE_authelia_jwt_secret_REPLACE/${WRT_AUTHELIA_JWT}/ ;
+    s/REPLACE_insecure_session_secret_REPLACE/${WRT_AUTHELIA_SES}/ ;
+    s/REPLACE_encryption_key_REPLACE/${WRT_AUTHELIA_DBKEY}/ ;
+    s#REPLACE_couch_uri_REPLACE#${WRT_COUCH_URI}# ;
+    s#ReplaceAutheliaUriSecretReplace#${WRT_AUTHELIA_URI}# ;
+  " \
+  'etc/fail2ban/filter.d/'*.local \
+  etc/haproxy/haproxy.cfg \
+  etc/dnsmasq.d/m.sets \
+  etc/authelia.yaml
 
 # add hotplug debug log:
 # shellcheck disable=2016
@@ -63,6 +76,8 @@ for f in patches/*.diff; do
   patch -p0 <"${f}"
 done
 /usr/bin/env rm -rfv patches
+/usr/bin/env cat etc/ssl/private/main.crt \
+  etc/ssl/private/main.key > etc/ssl/private/main.pem
 
 # system:
 /usr/bin/env cat <<EOF >etc/config/system
@@ -542,6 +557,16 @@ done
 # hide luci:
 /usr/bin/env mv -vf 'www/cgi-bin' "www/luci-cgi-${WRT_LUCI_CGI}"
 /usr/bin/env mv -vf 'www/luci-static' "www/luci-sta-${WRT_LUCI_STA}"
+/usr/bin/env rm -vf 'www/'* 'etc/haproxy.cfg' 'etc/uci-defaults/60_nginx-luci-support' ||
+  /usr/bin/env true
+/usr/bin/env rm -vfr 'etc/nginx/conf.d'
+
+# put build №:
+[[ -z "${WRT_GREWIBU}" ]] && export WRT_GREWIBU='999'
+echo "OPENWRT_GREWIBU='${WRT_GREWIBU}'" >>etc/os-release
+/usr/bin/env sed -ri \
+  "s/(.*OpenWrt\s+[0-9]+\..+\,\s+[0-9a-z\-]+)\s*/\1 gwb${WRT_GREWIBU}/" \
+  etc/banner
 
 # copy for observation
 cp -rv etc /builder/bin/targets/mediatek/filogic
