@@ -6,6 +6,10 @@ set -ueo pipefail
 : "${T2S:="tun2socks"}"
 : "${T2SV:="tun2socks-linux-arm64"}"
 : "${T2SU:="https://github.com/xjasonlyu/tun2socks/releases/download/v2.5.2/tun2socks-linux-arm64.zip"}"
+: "${AIA:="authelia"}"
+: "${AIAV:="authelia-linux-arm64-musl"}"
+: "${AIAU:="https://github.com/authelia/authelia/releases/download/v4.38.18/authelia-v4.38.18-linux-arm64-musl.tar.gz"}"
+
 if [[ -n "${WRT_SET_PASSWD:-}" ]]; then
   /usr/bin/env printf "${WRT_SET_PASSWD}\n${WRT_SET_PASSWD}\n" |
     /usr/bin/env passwd
@@ -23,7 +27,12 @@ fi
   /usr/bin/env mkdir -vp /opt/bin/
   cd /opt/bin
   /usr/bin/env curl -Lm 111 -o - "${T2SU}" |
-    /usr/bin/bsdtar xvf -
+    /usr/bin/env bsdtar xvf - "${T2SV}"
   /usr/bin/env mv -fv "${T2SV}" "${T2S}"
   /usr/bin/env chmod 755 "${T2S}"
+
+  /usr/bin/env curl -Lm 111 -o - "${AIAU}" |
+    /usr/bin/env bsdtar xvf - "${AIAV}"
+  /usr/bin/env mv -fv "${AIAV}" "${AIA}"
+  /usr/bin/env chmod 755 "${AIA}"
 )
