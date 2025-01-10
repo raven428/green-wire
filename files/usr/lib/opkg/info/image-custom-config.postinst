@@ -19,6 +19,7 @@ rm -fv "etc/secrets.sh"
 # crontab:
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
+1 0 * * * /etc/init.d/atop restart
 EOF
 
 # replace network 3 octets:
