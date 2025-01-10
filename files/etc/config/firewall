@@ -12,9 +12,9 @@ config zone 'zone_lan'
 	option output 'ACCEPT'
 	option forward 'ACCEPT'
 
-config forwarding 'fw_lan_wan'
+config forwarding 'fw_lan_ext'
 	option src 'lan'
-	option dest 'wan'
+	option dest 'ext'
 
 config rule
 	option name 'Allow-DHCP-Renew'
@@ -59,7 +59,7 @@ config rule
 	option src 'wan'
 	option proto 'tcp'
 	option dest_port '443 1443 5022'
-	option name 'Allow-WAN-conf'
+	option name 'Allow-TCP-wan'
 
 config redirect 'transmission'
 	option dest 'lan'
@@ -73,6 +73,14 @@ config redirect 'transmission'
 
 config zone 'zone_wan'
 	option name 'wan'
+	option input 'DROP'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	list network 'wan4'
+	list network 'wan6'
+
+config zone 'zone_ext'
+	option name 'ext'
 	option input 'DROP'
 	option output 'ACCEPT'
 	option forward 'DROP'
