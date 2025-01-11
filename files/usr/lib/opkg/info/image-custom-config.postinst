@@ -408,7 +408,8 @@ config ipset 'vpn_${r}'
 	# list name 'tproxy6'
 EOF
 done
-  /usr/bin/env cat <<EOF >>etc/config/firewall
+
+/usr/bin/env cat <<EOF >>etc/config/firewall
 
 config ipset 'tun2ray4'
 	option name 'tun2ray4'
@@ -484,18 +485,35 @@ config rule 'mark4_src_m'
 	option set_mark '0x100'
 	option target 'MARK'
 	list proto 'all'
+
+config ipset 'prskt4'
+	option name 'prskt4'
+	option family 'ipv4'
+	list match 'src_net'
+	list match 'dest_net'
+	option loadfile '/etc/nftsets/prskt4.txt'
+
+config rule 'mark4_prskt'
+	option name 'mark4_prskt'
+	option src 'lan'
+	option dest '*'
+	option ipset 'prskt4'
+	option set_mark '0x197'
+	option target 'MARK'
+	list proto 'all'
 EOF
 
 # resolf.conf
-  /usr/bin/env ls -la etc/resolv.conf
-	/usr/bin/env rm -fv etc/resolv.conf
-  /usr/bin/env cat <<EOF >>etc/resolv.conf
+/usr/bin/env ls -la etc/resolv.conf
+/usr/bin/env rm -fv etc/resolv.conf
+/usr/bin/env cat <<EOF >>etc/resolv.conf
 search lan local localdomain ${WRT_SECRET_TLD} home.${WRT_SECRET_TLD}
 nameserver 127.0.0.1
 nameserver ::1
 EOF
 
-  /usr/bin/env cat <<EOF >>etc/config/wireless
+# wifi config
+/usr/bin/env cat <<EOF >>etc/config/wireless
 
 config wifi-device 'radio0'
 	option type 'mac80211'
@@ -555,10 +573,47 @@ config host
 EOF
 done
 
+# l2tp thru ipsec
+/usr/bin/env cat <<EOF >>etc/config/network
+
+config interface 'prskt'
+	option proto 'l2tp'
+	option server '${WRT_L2TP_SERVER}'
+	option username '${WRT_L2TP_LOGIN}'
+	option password '${WRT_L2TP_PASSWD}'
+	option ip4table 'prskt'
+	option ip6table 'prskt'
+	option keepalive '6'
+	option ipv6 '0'
+EOF
+/usr/bin/env cat <<EOF >etc/ipsec.conf
+# ipsec config
+config setup
+  uniqueids=no
+conn prskt
+  authby=secret
+  auto=start
+  keyexchange=ikev1
+  type=transport
+  left=%defaultroute
+  leftprotoport=17/%any
+  right=${WRT_L2TP_SERVER}
+  rightid=%any
+  rightprotoport=17/1701
+  dpddelay=22
+  dpdtimeout=55
+  dpdaction=clear
+  keyingtries=0
+  lifetime=9999s
+  ikelifetime=11111s
+EOF
+echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >> etc/ipsec.secrets
+
 # hide luci:
 /usr/bin/env mv -vf 'www/cgi-bin' "www/luci-cgi-${WRT_LUCI_CGI}"
 /usr/bin/env mv -vf 'www/luci-static' "www/luci-sta-${WRT_LUCI_STA}"
-/usr/bin/env rm -vf 'www/'* 'etc/haproxy.cfg' 'etc/uci-defaults/60_nginx-luci-support' ||
+/usr/bin/env rm -vf 'www/'* 'etc/haproxy.cfg' 'etc/uci-defaults/60_nginx-luci-support' \
+	etc/firewall.fail2ban etc/uci-defaults/99_fail2ban ||
   /usr/bin/env true
 /usr/bin/env rm -vfr 'etc/nginx/conf.d'
 

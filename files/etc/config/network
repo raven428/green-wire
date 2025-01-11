@@ -146,6 +146,18 @@ config route6 'tun2ray_ro6'
 	option table 'tun2ray'
 	option target '::/0'
 
+config rule 'prskt_ru4'
+	option name 'prskt'
+	option mark '0x197'
+	option priority '100'
+	option lookup 'prskt'
+
+config route 'prskt_ro4'
+	option name 'prskt'
+	option interface 'prskt'
+	option table 'prskt'
+	option target '0.0.0.0/0'
+
 config interface 'docker'
 	option device 'docker0'
 	option proto 'none'

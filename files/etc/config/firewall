@@ -38,14 +38,6 @@ config rule
 	option family 'ipv6'
 	option target 'ACCEPT'
 
-config include 'fail2ban'
-	option path '/etc/firewall.fail2ban'
-	option enabled '1'
-
-config include '3x_ui'
-	option path '/etc/firewall.3x-ui'
-	option enabled '1'
-
 config zone 'docker'
 	option input 'ACCEPT'
 	option output 'ACCEPT'
@@ -88,5 +80,6 @@ config zone 'zone_ext'
 	option masq6 '1'
 	option mtu_fix '1'
 	list network 'tun2ray'
+	list network 'prskt'
 	list network 'wan4'
 	list network 'wan6'
