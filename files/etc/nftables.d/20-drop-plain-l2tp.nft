@@ -1,0 +1,14 @@
+# deny non-ipsec l2tp
+chain input_wan {
+  udp sport 1701 meta ipsec exists accept
+  udp dport 1701 meta ipsec exists accept
+  udp sport 1701 drop
+  udp dport 1701 drop
+}
+chain ipsec_out {
+  type filter hook output priority filter - 10; policy accept;
+  udp sport 1701 rt ipsec exists accept
+  udp dport 1701 rt ipsec exists accept
+  udp sport 1701 drop
+  udp dport 1701 drop
+}

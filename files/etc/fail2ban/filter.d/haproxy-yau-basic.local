@@ -1,0 +1,3 @@
+# fail2ban filter configuration for 3x-ui haproxy auth
+[Definition]
+failregex = .+ haproxy\[\d+\]: yau\.REPLACE_secret_tld_REPLACE\:?[^\s]* <HOST> .+ "[^\s]+ \/login\/?[^\s]* HTTP\/.+ 401 .+

@@ -5,7 +5,8 @@ srv_cmd = nginx
 blck_lst_reload = %(srv_cmd)s -qt; if [ $? -eq 0 ]; then
                     %(srv_cmd)s -s reload; if [ $? -ne 0 ]; then echo 'reload failed.'; fi;
                   fi;
-blck_lst_file = %(srv_cfg_path)s/fail2ban.map
+blck_lst_name = fail2ban.map
+blck_lst_file = %(srv_cfg_path)s/%(blck_lst_name)s
 actionstart_on_demand = false
 actionstart = touch '%(blck_lst_file)s'
 actionflush = truncate -s 0 '%(blck_lst_file)s'; %(blck_lst_reload)s

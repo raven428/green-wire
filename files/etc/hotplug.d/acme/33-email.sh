@@ -10,14 +10,16 @@ printf "cert [%s] done [%s] at [%s] dt" "${domains}" "${ACTION}" \
     -s 'новости cert подсистемы' \
     "${account_email}"
 if [[ "$ACTION" = "issued" ]]; then
-  for svc in 3x-ui uhttpd nginx; do
-    /etc/init.d/${svc} status && /etc/init.d/${svc} restart
-  done
   domain="${main_domain#"${main_domain%%[![:space:]]*}"}"
   {
     /usr/bin/env ln -sfv "/etc/ssl/acme/${domain}.key" \
       '/etc/ssl/private/main.key'
     /usr/bin/env ln -sfv "/etc/ssl/acme/${domain}.fullchain.crt" \
       '/etc/ssl/private/main.crt'
+    /usr/bin/env ln -sfv "/etc/ssl/acme/${domain}.combined.crt" \
+      '/etc/ssl/private/main.pem'
+    for svc in 3x-ui uhttpd nginx haproxy; do
+      /etc/init.d/${svc} status && /etc/init.d/${svc} restart
+    done
   } 2>&1 | /usr/bin/env logger -t 'acme-issued'
 fi

@@ -1,0 +1,80 @@
+---
+theme: "light"
+default_2fa_method: "totp"
+server:
+  address: "tcp://:9091/autheliaReplaceAutheliaUriSecretReplace"
+  endpoints:
+    authz:
+      forward-auth:
+        implementation: 'ForwardAuth'
+log:
+  level: "info"
+  format: "text"
+totp:
+  issuer: "REPLACE_hostname_REPLACE"
+webauthn:
+  disable: true
+duo_api:
+  disable: true
+identity_validation:
+  reset_password:
+    jwt_secret: "REPLACE_authelia_jwt_secret_REPLACE"
+ntp:
+  disable_startup_check: true
+  disable_failure: true
+authentication_backend:
+  file:
+    path: "users.yaml"
+    password:
+      algorithm: "argon2"
+    search:
+      email: false
+      case_insensitive: false
+password_policy:
+  standard:
+    enabled: true
+    min_length: 22
+    max_length: 55
+    require_uppercase: true
+    require_lowercase: true
+    require_number: true
+    require_special: true
+access_control:
+  default_policy: "deny"
+  rules:
+    - domain: "yau.REPLACE_secret_tld_REPLACE"
+      policy: "one_factor"
+    - domain: "REPLACE_hostname_REPLACE.REPLACE_secret_tld_REPLACE"
+      policy: "one_factor"
+session:
+  secret: "REPLACE_insecure_session_secret_REPLACE"
+  cookies:
+    - name: "authelia_session"
+      domain: "REPLACE_secret_tld_REPLACE"
+      authelia_url: "https://yau.REPLACE_secret_tld_REPLACE/autheliaReplaceAutheliaUriSecretReplace"
+      same_site: "lax"
+      inactivity: "55 minutes"
+      expiration: "11 days"
+      remember_me: "11 months"
+regulation:
+  max_retries: 5
+  find_time: "3 hour"
+  ban_time: "10 hour"
+storage:
+  encryption_key: "REPLACE_encryption_key_REPLACE"
+  local:
+    path: "storage.db"
+notifier:
+  disable_startup_check: true
+  smtp:
+    address: "smtp://REPLACE_SMTP_host_REPLACE:25"
+    timeout: "5 seconds"
+    username: "REPLACE_SMTP_login_REPLACE"
+    password: "REPLACE_SMTP_passwd_REPLACE"
+    sender: "Authelia <authelia@REPLACE_hostname_REPLACE.REPLACE_secret_tld_REPLACE>"
+    identifier: "REPLACE_hostname_REPLACE.REPLACE_secret_tld_REPLACE"
+    subject: "[Authelia] {title}"
+    disable_require_tls: false
+    disable_html_emails: false
+    tls:
+      skip_verify: true

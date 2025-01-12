@@ -7,8 +7,9 @@ findtime = 3h
 maxretry = 5
 sender = fail2ban@<fq-hostname>
 destemail = raven428@gmail.com
-banaction = nftables-multiport[blocktype="drop",port="%(port)s"]
-		sendmail-common[sender="%(sender)s", dest="%(destemail)s", logpath="%(logpath)s", chain="%(chain)s"]
+ipbanact = nftables-multiport[blocktype="drop",port="%(port)s"]
+banaction = %(ipbanact)s
+  sendmail-common[sender="%(sender)s", dest="%(destemail)s", logpath="%(logpath)s", chain="%(chain)s"]
 
 [dropbear]
 port = 5022
@@ -18,13 +19,38 @@ logpath = %(openwrt_system_log)s
 [nginx-3x-login]
 port = 443
 enabled = true
-banaction = nginx-deny-ip
+ipbanact = nginx-deny-ip[blck_lst_name="3xui2ban.map"]
 logpath = %(openwrt_system_log)s
 
 [nginx-luci-login]
 port = 443
 enabled = true
-banaction = nginx-deny-ip
+ipbanact = nginx-deny-ip[blck_lst_name="luci2ban.map"]
+logpath = %(openwrt_system_log)s
+
+[haproxy-3x-login]
+enabled = true
+ipbanact = haproxy-deny-ip[blck_lst_name="3xui2ban.map"]
+logpath = %(openwrt_system_log)s
+
+[haproxy-luci-login]
+enabled = true
+ipbanact = haproxy-deny-ip[blck_lst_name="luci2ban.map"]
+logpath = %(openwrt_system_log)s
+
+[haproxy-yau-basic]
+enabled = true
+ipbanact = haproxy-deny-ip[blck_lst_name="yau2ban.map"]
+logpath = %(openwrt_system_log)s
+
+[haproxy-couch-auth]
+enabled = true
+ipbanact = haproxy-deny-ip[blck_lst_name="couch2ban.map"]
+logpath = %(openwrt_system_log)s
+
+[haproxy-authelia]
+enabled = true
+ipbanact = haproxy-deny-ip[blck_lst_name="authelia2ban.map"]
 logpath = %(openwrt_system_log)s
 
 [luci-uhttpd-auth]

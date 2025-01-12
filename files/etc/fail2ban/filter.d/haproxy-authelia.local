@@ -1,0 +1,3 @@
+# fail2ban filter configuration for luci haproxy auth
+[Definition]
+failregex = .+ haproxy\[\d+\]: .+ <HOST> .+ "POST \/authelia[^\/]+\/[^\s]* HTTP\/.+ 401 .+
