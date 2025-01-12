@@ -28,13 +28,34 @@ export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"123.321.231.132"}'
 export WRT_L2TP_LOGIN='${WRT_L2TP_LOGIN:-"l2tp-user"}'
 export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
 export WRT_IPSEC_PSK='${WRT_IPSEC_PSK:-"s3cre1P5k4ipSek4pr0tect"}'
+export WRT_WARP_REG='${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}'
 export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
 dir300@00:21:91:31:98:60#99"}'
+EOF
+/usr/bin/env rm -rfv prepare/root/dot-git
+/usr/bin/env cp -r .git/modules/files/root prepare/root/dot-git
+/usr/bin/env cat <<EOF >prepare/root/dot-git/config
+[core]
+  repositoryformatversion = 0
+  filemode = true
+  bare = false
+  logallrefupdates = true
+[remote "origin"]
+  url = git@github.com:raven428/profile.git
+  fetch = +refs/heads/*:refs/remotes/origin/*
+[branch "master"]
+  remote = origin
+  merge = refs/heads/master
+[log]
+  showSignature = false
+[user]
+  name = Dmitry Sukhodoev
+  email = raven428@gmail.com
 EOF
 for f in prepare/etc/dnsmasq.d/*.sets; do
   r="${f##*/}"
   r="${r%.*}"
-  sed -E "/^[[:space:]]*#/b ; /^[[:space:]]*$/b ;
+  /usr/bin/env sed -E "/^[[:space:]]*#/b ; /^[[:space:]]*$/b ;
     s~^(.*)$~nftset=/\1/4#inet#fw4#vpn4_${r},6#inet#fw4#vpn6_${r}~
   " -i "${f}"
 done
@@ -54,15 +75,15 @@ EOF
   /usr/bin/env bash -c " \
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
   make image PROFILE='bananapi_bpi-r3' FILES='/files' \
-  ROOTFS_PARTSIZE='1111' EXTRA_PARTSIZE='6111' \
+  ROOTFS_PARTSIZE='2222' EXTRA_PARTSIZE='5155' \
   PACKAGES='-dnsmasq atop lsblk mmc-utils ca-certificates bsdtar ack mtr-json haproxy \
   acme-acmesh-dnsapi netatop bash bind-dig bind-host bind-nslookup bird2 bird2c bird2cl \
-  blkid block-mount bsdiff bspatch btop cfdisk cgdisk clocate conntrack ctop curl \
+  blkid block-mount bsdiff bspatch btop cfdisk cgdisk clocate conntrack ctop curl iconv \
   ddns-scripts-cloudflare diffutils dnscrypt-proxy2 dnsmasq-full docker docker-compose \
   dockerd ethtool fail2ban fdisk file findutils-find findutils-locate findutils-xargs \
-  flock fping gawk gdisk git grep hping3 htop iftop iperf iperf3 iputils-arping \
+  flock fping gawk gdisk git grep hping3 htop iftop iperf iperf3 iputils-arping bwm-ng \
   iputils-clockdiff iputils-ping iputils-tracepath jool-tools-netfilter jq less libgcc \
-  libustream-mbedtls lm-sensors logger losetup monit moreutils msmtp msmtp-queue \
+  libustream-mbedtls lm-sensors logger losetup monit moreutils msmtp msmtp-queue bmon \
   mutt nand-utils netcat nfdump nftables openssh-sftp-server openssl-util parted patch \
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
@@ -92,7 +113,7 @@ EOF
   coreutils-users coreutils-vdir coreutils-wc coreutils-who coreutils-whoami \
   coreutils-yes net-tools-route \
   \
-  kmod-nft-tproxy kmod-tun stress-ng stress \
+  kmod-nft-tproxy kmod-dummy kmod-tun stress-ng stress \
   \
   shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
   \
