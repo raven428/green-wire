@@ -1,0 +1,13 @@
+# ppp default options
+#debug
+logfile /dev/null
+noipdefault
+noaccomp
+nopcomp
+nocrtscts
+lock
+maxfail 0
+persist
+lcp-echo-interval 10
+lcp-echo-failure 3
+holdoff 1
