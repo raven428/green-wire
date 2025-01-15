@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ueo pipefail
+set -u
 non_formatted_extra="$(
   /usr/bin/env lsblk -i -o path,partlabel,fstype -J |
     /usr/bin/env jq -r '.blockdevices[] |
@@ -32,13 +32,15 @@ echo "adding [${uci_record}] uci record" | tee /dev/kmsg
 /usr/bin/env uci commit
 /usr/bin/env block mount
 if [[ ${move_home} == 1 ]]; then
-  /usr/bin/env mkdir -vp /extra/home | tee /dev/kmsg &&
-    /usr/bin/env mv -vf /root /extra/home | tee /dev/kmsg
+  /usr/bin/env rm -rfv /extra/home 2>&1 | tee /dev/kmsg
+  /usr/bin/env mkdir -vp /extra/home 2>&1 | tee /dev/kmsg
+  /usr/bin/env mv -vf /root /extra/home 2>&1 | tee /dev/kmsg
+  /usr/bin/env mv -vf /extra/home/root/dot-git \
+    /extra/home/root/.git 2>&1 | tee /dev/kmsg
 else
   echo 'extra partition format isn'\''t happened, skipped home moving' | tee /dev/kmsg
 fi
-/usr/bin/env rm -rfv /root | tee /dev/kmsg &&
-  /usr/bin/env ln -sfv /extra/home/root /root | tee /dev/kmsg
-/usr/bin/env rm -rfv /opt | tee /dev/kmsg &&
-  /usr/bin/env ln -sfv /extra/opt /opt | tee /dev/kmsg
+/usr/bin/env rm -rfv /opt /root 2>&1 | tee /dev/kmsg
+/usr/bin/env ln -sfv /extra/opt /opt 2>&1 | tee /dev/kmsg
+/usr/bin/env ln -sfv /extra/home/root /root 2>&1 | tee /dev/kmsg
 exit 0

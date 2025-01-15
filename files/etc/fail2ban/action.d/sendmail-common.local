@@ -2,26 +2,15 @@
 [INCLUDES]
 before = mail-whois-common.conf
 [Definition]
-#actionstart = printf %%b "Subject: at [<fq-hostname>] started [<name>] jail [$(date '+%%Y-%%m-%%dT%%H:%%M:%%S')] by
-#              Date: `LC_ALL=C date +"%%a, %%d %%h %%Y %%T %%z"`
-#              From: <sendername> <<sender>>
-#              To: <dest>\n
-#              The jail [<name>] has been started successfully.\n
-#              Your Fail2Ban" | <mailcmd>
-#actionstop = printf %%b "Subject: at [<fq-hostname>] stopped [<name>] jail [$(date '+%%Y-%%m-%%dT%%H:%%M:%%S')] by
-#             Date: `LC_ALL=C date +"%%a, %%d %%h %%Y %%T %%z"`
-#             From: <sendername> <<sender>>
-#             To: <dest>\n
-#             The jail [<name>] has been stopped.\n
-#             Your Fail2Ban" | <mailcmd>
 actionstart =
 actionstop =
-actionban = printf %%b "Subject: banned [<ip>] ip [<name>] jail [<fq-hostname>] host [$(date '+%%Y-%%m-%%dT%%H:%%M:%%S')] by
-            Date: $(LC_ALL=C date +"%%a, %%d %%h %%Y %%T %%z")
-            From: <sendername> <<sender>>
-            To: <dest>\n
-            IP [<ip>] banned by [<name>] jail after [<failures>] attempts
-            whois: `%(_whois_command)s`\n
-            Matches:
-            <matches>\n
-            Your Fail2Ban" | <mailcmd>
+actionban = printf %%b "Addr [<ip>] by [<name>] jail banned after [<failures>] attempts. Whois:\n`%(_whois_command)s`\n
+  Matches:
+  <matches>\n
+  Your Fail2Ban" | /usr/bin/mutt \
+  -e 'set envelope_from=yes' \
+  -e 'set from=<sender>' \
+  -e 'set realname="<sendername>"' \
+  -e 'set send_charset=utf-8' \
+  -s "banned [<ip>] ip [<name>] jail [<fq-hostname>] host [$(date '+%%Y-%%m-%%dT%%H:%%M:%%S')] by" \
+  "<dest>" 2>/dev/null >/dev/null
