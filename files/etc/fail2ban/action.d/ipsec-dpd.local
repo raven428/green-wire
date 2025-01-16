@@ -1,0 +1,7 @@
+# ipsec-dpd happened
+[Definition]
+actionstart =
+actionstop =
+actioncheck =
+actionban = /etc/init.d/xl2tpd stop; ifup prskt
+actionunban =

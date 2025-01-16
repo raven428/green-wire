@@ -61,3 +61,10 @@ logpath = %(openwrt_system_log)s
 [startstop-notify]
 enabled = true
 action = startstop-notify[sender="%(sender)s", dest="%(destemail)s"]
+
+[ipsec-dpd]
+enabled  = true
+logpath = %(openwrt_system_log)s
+action = ipsec-dpd
+maxretry = 3
+bantime = 33s
