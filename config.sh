@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -ueo pipefail
 : "${XUI:="3x-ui"}"
-: "${XUIV:="${XUI}-2_4_5-arm64-static-musl"}"
+: "${XUIV:="${XUI}-2_4_5_qtg-arm64-static-musl"}"
 : "${XURI:="https://github.com/raven428/container-images/releases/download/000/${XUIV}.tar.xz"}"
 : "${T2S:="tun2socks"}"
 : "${T2SV:="tun2socks-linux-arm64"}"
