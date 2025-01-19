@@ -95,12 +95,12 @@ server_names = [
 ## To listen to all IPv4 addresses, use `listen_addresses = ['0.0.0.0:53']`
 ## To listen to all IPv4+IPv6 addresses, use `listen_addresses = ['[::]:53']`
 
-listen_addresses = ['127.0.0.53:53']
+listen_addresses = ['127.0.0.53:53', '0.0.0.0:1053']
 
 
 ## Maximum number of simultaneous client connections to accept
 
-max_clients = 250
+max_clients = 11111
 
 
 ## Switch to a different system user after listening sockets have been created.
@@ -477,22 +477,22 @@ cache_size = 4096
 
 ## Minimum TTL for cached entries
 
-cache_min_ttl = 600
+cache_min_ttl = 60
 
 
 ## Maximum TTL for cached entries
 
-cache_max_ttl = 1800
+cache_max_ttl = 3600
 
 
 ## Minimum TTL for negatively cached entries
 
-cache_neg_min_ttl = 0
+cache_neg_min_ttl = 30
 
 
 ## Maximum TTL for negatively cached entries
 
-cache_neg_max_ttl = 3
+cache_neg_max_ttl = 60
 
 
 
