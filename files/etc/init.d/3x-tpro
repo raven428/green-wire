@@ -5,8 +5,11 @@ START=95
 USE_PROCD=1
 CHAIN='lan2tproxy'
 TABLE='tproxy'
+MARKS='0x100-0x115'
+PORT='10199'
 MARK='0x198'
 NFT='xui'
+LAN='br-lan.77'
 
 start_service() {
   nft "list table inet ${NFT}" >/dev/null 2>&1 || nft "add table inet ${NFT}"
@@ -16,20 +19,26 @@ start_service() {
   }"
   nft "add rule inet \
     ${NFT} ${CHAIN} \
-    meta nfproto ipv4 \
-    iifname \"br-lan.77\" \
-    meta mark 0x100-0x115 \
-    meta l4proto { tcp, udp } \
-    counter meta mark set ${MARK} \
-    tproxy ip to 127.0.0.1:10199"
+    iifname ${LAN} \
+    meta mark ${MARKS} \
+    fib daddr type local \
+    counter return"
   nft "add rule inet \
     ${NFT} ${CHAIN} \
-    meta nfproto ipv6 \
-    iifname \"br-lan.77\" \
-    meta mark 0x100-0x115 \
+    iifname ${LAN} \
+    meta nfproto ipv4 \
+    meta mark ${MARKS} \
     meta l4proto { tcp, udp } \
     counter meta mark set ${MARK} \
-    tproxy ip6 to [::1]:10199"
+    tproxy ip to 127.0.0.1:${PORT}"
+  nft "add rule inet \
+    ${NFT} ${CHAIN} \
+    iifname ${LAN} \
+    meta nfproto ipv6 \
+    meta mark ${MARKS} \
+    meta l4proto { tcp, udp } \
+    counter meta mark set ${MARK} \
+    tproxy ip6 to [::1]:${PORT}"
   ip rule add fwmark ${MARK} table ${TABLE} priority 100
   ip route add local 0.0.0.0/0 dev lo table ${TABLE}
   ip -6 rule add fwmark ${MARK} table ${TABLE} priority 100
