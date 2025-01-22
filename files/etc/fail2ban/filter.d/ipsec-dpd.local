@@ -1,0 +1,4 @@
+# ipsec dpd happened
+[Definition]
+failregex = .*parsed INFORMATIONAL_V1 request \d+ \[ HASH N\(<F-ID>DPD_ACK</F-ID>\) \].*
+dataport = 0

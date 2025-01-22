@@ -88,7 +88,7 @@ EOF
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
-  logrotate nmap-full xl2tpd strongswan-full \
+  logrotate nmap-full xl2tpd strongswan-full sudo \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
@@ -109,7 +109,7 @@ EOF
   coreutils-stdbuf coreutils-stty coreutils-sum coreutils-sync coreutils-tac \
   coreutils-tail coreutils-tee coreutils-test coreutils-timeout coreutils-touch \
   coreutils-tr coreutils-true coreutils-truncate coreutils-tsort coreutils-tty \
-  coreutils-uname coreutils-unexpand coreutils-uniq coreutils-unlink coreutils-uptime \
+  coreutils-uname coreutils-unexpand coreutils-uniq coreutils-unlink psmisc \
   coreutils-users coreutils-vdir coreutils-wc coreutils-who coreutils-whoami \
   coreutils-yes net-tools-route \
   \

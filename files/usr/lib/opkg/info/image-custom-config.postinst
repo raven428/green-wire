@@ -294,16 +294,16 @@ if [[ -z "${pvk}" ]]; then
   )"
 fi
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
-warp_regions='tr cy kz ge de us ng cl bg it ar uy se nl cz m'
+warp_regions='m tr cy kz ge de us ng cl bg it ar uy se nl cz'
 for r in ${warp_regions}; do
   /usr/bin/env cat <<EOF >>etc/config/firewall
 	list network 'wgcf${r}'
 EOF
 done
 count=0
-mtu='1300'
 for r in ${warp_regions}; do
   count=$((count + 1))
+	mtu='1300'
   [[ "$r" == "m" ]] && count=0 && mtu='1420'
   [[ -e "etc/nftsets/vpn4_${r}.txt" ]] ||
     /usr/bin/env cat <<EOF >>"etc/nftsets/vpn4_${r}.txt"
@@ -597,7 +597,9 @@ config interface 'prskt'
 	option password '${WRT_L2TP_PASSWD}'
 	option ip4table 'prskt'
 	option ip6table 'prskt'
-	option keepalive '6'
+	option keepalive '5, 5'
+	option disabled '0'
+	option auto '1'
 	option ipv6 '0'
 EOF
 /usr/bin/env cat <<EOF >etc/ipsec.conf
