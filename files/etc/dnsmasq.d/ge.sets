@@ -7,6 +7,8 @@ redotpay.com
 zadarma.com
 yesim.app
 yesim.co.uk
+silknet.com
+redhat.com
 
 # bybit – не добавлять, очень много доменов отснифалось
 # bybit.com
@@ -34,6 +36,7 @@ production-openaicom-storage.azureedge.net
 webpubsub.azure.com
 o33249.ingest.sentry.io
 openaicom.imgix.net
+deepseek.com
 
 # paypal
 account-paypal.info
