@@ -88,7 +88,7 @@ EOF
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
-  logrotate nmap-full xl2tpd strongswan-full sudo \
+  logrotate nmap-full xl2tpd strongswan-full sudo prlimit \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
@@ -118,7 +118,8 @@ EOF
   shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
   \
   luci luci-app-acme luci-app-ddns luci-mod-dashboard luci-proto-wireguard \
-  luci-ssl-nginx luci-app-uhttpd \
+  luci-ssl-nginx luci-app-uhttpd luci-app-statistics luci-app-vnstat2 \
+  luci-app-nlbwmon \
   \
   procps-ng-free procps-ng-kill procps-ng-pgrep procps-ng-pkill procps-ng-pmap \
   procps-ng-ps procps-ng-pwdx procps-ng-skill procps-ng-slabtop procps-ng-snice \
@@ -129,6 +130,14 @@ EOF
   prometheus-node-exporter-lua-netstat prometheus-node-exporter-lua-openwrt \
   prometheus-node-exporter-lua-thermal prometheus-node-exporter-lua-wifi \
   prometheus-node-exporter-lua-wifi_stations \
+  \
+  collectd-mod-conntrack collectd-mod-contextswitch collectd-mod-dhcpleases \
+  collectd-mod-uptime collectd-mod-thermal collectd-mod-cpufreq collectd-mod-entropy \
+  collectd-mod-exec collectd-mod-interface collectd-mod-ipstatistics collectd-mod-irq \
+  collectd-mod-netlink collectd-mod-processes collectd-mod-tcpconns collectd-mod-thermal \
+  collectd-mod-uptime collectd-mod-dns collectd-mod-ethstat collectd-mod-filecount \
+  collectd-mod-fscache collectd-mod-ntpd collectd-mod-protocols collectd-mod-swap \
+  collectd-mod-users collectd-mod-vmem collectd-mod-wireless collectd-mod-sensors \
   ' \
 "
 /usr/bin/env sudo chown -R "${USER}" release
