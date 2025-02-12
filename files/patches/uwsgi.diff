@@ -10,6 +10,6 @@
 +	procd_set_param respawn \
 +		${respawn_threshold:-333} \
 +		${respawn_timeout:-3} \
-+		${respawn_retry:-33}
++		${respawn_retry:-0}
  	procd_close_instance
  }
