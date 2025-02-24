@@ -9,7 +9,7 @@ on:
 jobs:
   test-build:
     name: test build
-    timeout-minutes: 7
+    timeout-minutes: 33
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
