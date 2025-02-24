@@ -12,9 +12,13 @@ youporn.com
 redtube.com
 tube8.com
 xhamster.com
+xvideos.com
+nude-gals.com
 phncdn.com
 etahub.com
 fans.ly
+sex-vids.eu
+thenude.com
 protonvpn.com
 api.antizapret.info
 barnesandnoble.com
@@ -36,7 +40,6 @@ habr.com
 flibusta.is
 flibusta.net
 flibusta.lib
-gemini.google.com
 ntc.party
 piaservers.net
 privateinternetaccess.com
@@ -95,6 +98,14 @@ umbra.blog
 orangepi.org
 ti-russia.org
 transparency.org
+etsy.com
+prismacloud.io
+torproject.org
+walmart.com
+moz.com
+opensiteexplorer.org
+netgate.com
+rockblack.su
 
 # torrent
 lostfilm.tv
@@ -132,6 +143,27 @@ rutor.lib
 thepiratebay.org
 bitru.org
 bigfangroup.org
+kinozal.tv
+dxp.ru
+exkinoray.ru
+trackerpmr.com
+riperam.org
+seatracker.ru
+use.selezen.club
+eniatv.com
+anilibria.tv
+nirvana.li
+bluebird-hd.org
+teamhd.org
+tormac.org
+uniongang.net
+newstudio.tv
+torrent.by
+file-tracker.net
+torrents-local.xyz
+filbi1976.org
+free-torrents.org
+seedoff.net
 
 # https://github.com/blackmatrix7/ios_rule_script and
 # https://github.com/v2fly/domain-list-community bellow
@@ -675,6 +707,7 @@ dockerhub.com
 d1q6f0aelx0por.cloudfront.net
 d2wy8f7a9ursnm.cloudfront.net
 d36jcksde1wxzq.cloudfront.net
+quay.io
 
 # aws
 aws
