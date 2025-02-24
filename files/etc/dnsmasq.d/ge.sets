@@ -36,7 +36,20 @@ production-openaicom-storage.azureedge.net
 webpubsub.azure.com
 o33249.ingest.sentry.io
 openaicom.imgix.net
+
+# chinai
+qwenlm.ai
 deepseek.com
+
+# grok
+x.ai
+grok.com
+
+# anthropic
+anthropic.com
+claude.ai
+claudeusercontent.com
+servd-anthropic-website.b-cdn.net
 
 # paypal
 account-paypal.info
