@@ -4,11 +4,17 @@
     /usr/bin/env logger -t 'pppup-r2d'
 }
 source /etc/ppp/ip.d/10-route2dns.sh
+tmp_dnsmasq_conf='/var/tmp/dnsmasq-prskt.conf'
+/usr/bin/env touch ${prskt_dnsmasq_conf}
+/usr/bin/truncate -s 0 "${tmp_dnsmasq_conf}"
 for dns in ${PROTO_DNS}; do
   /sbin/ip ro add "${dns}/32" via "${IPREMOTE}" 2>&1 |
     /usr/bin/env logger -t 'pppup-r2d'
   echo "add [${dns}] via [${IPREMOTE}] route" |
     /usr/bin/env logger -t 'pppup-r2d'
-  echo "server=/perspekt.local/${dns}" >>${prskt_dnsmasq_conf}
+  echo "server=/perspekt.local/${dns}" >>${tmp_dnsmasq_conf}
 done
-/etc/init.d/dnsmasq restart
+/usr/bin/env diff -u "${tmp_dnsmasq_conf}" "${prskt_dnsmasq_conf}" || {
+  /usr/bin/env cp -v "${tmp_dnsmasq_conf}" "${prskt_dnsmasq_conf}"
+  /etc/init.d/dnsmasq restart
+}

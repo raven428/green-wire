@@ -11,7 +11,7 @@ start_service() {
   procd_set_param respawn \
     ${respawn_threshold:-333} \
     ${respawn_timeout:-3} \
-    ${respawn_retry:-33}
+    ${respawn_retry:-0}
   procd_set_param command \
     /opt/bin/tun2socks -device 'tun://tun2ray' \
     -proxy 'socks5://tun2socks:kWOGr2ysCA@127.0.0.1:19645'

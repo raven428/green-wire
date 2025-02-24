@@ -19,7 +19,7 @@ rm -fv "etc/secrets.sh"
 # crontab:
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
-1 0 * * * /etc/init.d/atop restart
+59 23 * * * /etc/init.d/atop restart
 EOF
 
 # replace network 3 octets:
@@ -30,20 +30,34 @@ EOF
 
 /usr/bin/env sed -i \
   "
-    s/REPLACE_hostname_REPLACE/${WRT_HOSTNAME}/ ;
-    s/REPLACE_SMTP_host_REPLACE/${WRT_SMTP_HOST}/ ;
-    s/REPLACE_SMTP_login_REPLACE/${WRT_SMTP_LOGIN}/ ;
-    s/REPLACE_SMTP_passwd_REPLACE/${WRT_SMTP_PASSWD}/ ;
-    s/REPLACE_secret_tld_REPLACE/${WRT_SECRET_TLD}/ ;
-    s/REPLACE_authelia_jwt_secret_REPLACE/${WRT_AUTHELIA_JWT}/ ;
-    s/REPLACE_insecure_session_secret_REPLACE/${WRT_AUTHELIA_SES}/ ;
-    s/REPLACE_encryption_key_REPLACE/${WRT_AUTHELIA_DBKEY}/ ;
-    s#REPLACE_couch_uri_REPLACE#${WRT_COUCH_URI}# ;
-    s#ReplaceAutheliaUriSecretReplace#${WRT_AUTHELIA_URI}# ;
+    s/REPLACE_hostname_REPLACE/${WRT_HOSTNAME}/g ;
+    s/REPLACE_SMTP_host_REPLACE/${WRT_SMTP_HOST}/g ;
+    s/REPLACE_SMTP_login_REPLACE/${WRT_SMTP_LOGIN}/g ;
+    s/REPLACE_SMTP_passwd_REPLACE/${WRT_SMTP_PASSWD}/g ;
+    s/REPLACE_secret_tld_REPLACE/${WRT_SECRET_TLD}/g ;
+    s/REPLACE_authelia_jwt_secret_REPLACE/${WRT_AUTHELIA_JWT}/g ;
+    s/REPLACE_insecure_session_secret_REPLACE/${WRT_AUTHELIA_SES}/g ;
+    s/REPLACE_encryption_key_REPLACE/${WRT_AUTHELIA_DBKEY}/g ;
+    s#REPLACE_couch_uri_REPLACE#${WRT_COUCH_URI}#g ;
+    s#ReplaceAutheliaUriSecretReplace#${WRT_AUTHELIA_URI}#g ;
+    s/REPLACE_luci_sta_REPLACE/${WRT_LUCI_STA}/g ;
+    s/REPLACE_luci_cgi_REPLACE/${WRT_LUCI_CGI}/g ;
+    s/REPLACE_clofa_to_REPLACE/${WRT_CLOFA_TO}/g ;
+    s/REPLACE_clofa_zo_REPLACE/${WRT_CLOFA_ZO}/g ;
+    s/REPLACE_wifi_ssid_REPLACE/${WRT_WIFI_SSID}/g ;
+    s/REPLACE_wifi_key_REPLACE/${WRT_WIFI_KEY}/g ;
   " \
   'etc/fail2ban/filter.d/'*.local \
+  etc/dnsmasq.d/addrs.conf \
   etc/haproxy/haproxy.cfg \
   etc/dnsmasq.d/m.sets \
+  etc/config/wireless \
+  etc/config/system \
+  etc/config/uhttpd \
+  etc/config/luci \
+  etc/config/acme \
+  etc/config/ddns \
+  etc/msmtprc \
   etc/authelia.yaml
 
 # add hotplug debug log:
@@ -79,180 +93,6 @@ done
 /usr/bin/env rm -rfv patches
 /usr/bin/env cat etc/ssl/private/main.crt \
   etc/ssl/private/main.key > etc/ssl/private/main.pem
-
-# system:
-/usr/bin/env cat <<EOF >etc/config/system
-config system 'main'
-	option hostname '${WRT_HOSTNAME}'
-	option timezone 'UTC'
-	option ttylogin '0'
-	option log_size '11111'
-	option urandom_seed '0'
-	option compat_version '1.1'
-	option log_file '/var/log/system.log'
-	option zonename 'UTC'
-	option zram_comp_algo 'lz4'
-
-config timeserver 'ntp'
-	option enabled '1'
-	option enable_server '0'
-	list server '0.openwrt.pool.ntp.org'
-	list server '1.openwrt.pool.ntp.org'
-	list server '2.openwrt.pool.ntp.org'
-	list server '3.openwrt.pool.ntp.org'
-	list server '216.239.35.0'
-	list server '216.239.35.4'
-	list server '216.239.35.8'
-	list server '216.239.35.12'
-	list server '162.159.200.123'
-	list server '162.159.200.1'
-EOF
-
-# uhttpd:
-/usr/bin/env cat <<EOF >etc/config/uhttpd
-config uhttpd 'main'
-	option redirect_https '0'
-	option home '/www'
-	option rfc1918_filter '1'
-	option max_requests '3'
-	option max_connections '100'
-	option cert '/etc/ssl/private/main.crt'
-	option key '/etc/ssl/private/main.key'
-	option cgi_prefix '/luci-cgi-${WRT_LUCI_CGI}'
-	option lua_prefix '/luci-cgi-${WRT_LUCI_CGI}/luci=/usr/lib/lua/luci/sgi/uhttpd.lua'
-	option script_timeout '60'
-	option network_timeout '30'
-	option http_keepalive '20'
-	option tcp_keepalive '1'
-	option ubus_prefix '/ubus'
-	list listen_http '[::]:5080'
-	list listen_http '0.0.0.0:5080'
-	list listen_https '[::]:5443'
-	list listen_https '0.0.0.0:5443'
-	option no_dirlists '1'
-
-config cert 'defaults'
-	option days '11111'
-	option key_type 'ec'
-	option bits '2048'
-	option ec_curve 'P-256'
-	option country 'XY'
-	option state 'Somewhere'
-	option location 'Classified'
-	option commonname 'Something'
-	option organization 'Vendor'
-EOF
-
-# luci:
-/usr/bin/env cat <<EOF >etc/config/luci
-config core 'main'
-	option lang 'auto'
-	option mediaurlbase '/luci-sta-${WRT_LUCI_STA}/bootstrap'
-	option resourcebase '/luci-sta-${WRT_LUCI_STA}/resources'
-	option ubuspath '/ubus/'
-
-config extern 'flash_keep'
-	option uci '/etc/config/'
-	option dropbear '/etc/dropbear/'
-	option openvpn '/etc/openvpn/'
-	option passwd '/etc/passwd'
-	option opkg '/etc/opkg.conf'
-	option firewall '/etc/firewall.user'
-	option uploads '/lib/uci/upload/'
-
-config internal 'languages'
-
-config internal 'sauth'
-	option sessionpath '/tmp/luci-sessions'
-	option sessiontime '1111111'
-
-config internal 'ccache'
-	option enable '1'
-
-config internal 'themes'
-	option Bootstrap '/luci-sta-${WRT_LUCI_STA}/bootstrap'
-	option BootstrapDark '/luci-sta-${WRT_LUCI_STA}/bootstrap-dark'
-	option BootstrapLight '/luci-sta-${WRT_LUCI_STA}/bootstrap-light'
-
-config internal 'apply'
-	option rollback '90'
-	option holdoff '4'
-	option timeout '5'
-	option display '1.5'
-
-config internal 'diag'
-	option dns 'openwrt.org'
-	option ping 'openwrt.org'
-	option route 'openwrt.org'
-EOF
-
-# ddns:
-/usr/bin/env cat <<EOF >etc/config/ddns
-config ddns 'global'
-	option ddns_dateformat '%F %R'
-	option ddns_loglines '250'
-	option upd_privateip '1'
-	option ddns_rundir '/var/run/ddns'
-	option ddns_logdir '/var/log/ddns'
-
-config service 'cloudflare'
-	option service_name 'cloudflare.com-v4'
-	option lookup_host '${WRT_HOSTNAME}.${WRT_SECRET_TLD}'
-	option domain '${WRT_HOSTNAME}@${WRT_SECRET_TLD}'
-	option username 'Bearer'
-	option password '${WRT_CLOFA_TO}'
-	option interface 'wan4'
-	option ip_source 'network'
-	option ip_network 'wan4'
-	option enabled '1'
-	option use_ipv6 '0'
-	option use_syslog '1'
-	option check_unit 'minutes'
-	option force_unit 'hours'
-	option retry_unit 'seconds'
-	option use_logfile '0'
-	option check_interval '11'
-	option force_interval '33'
-	option retry_interval '22'
-EOF
-
-# acme:
-/usr/bin/env cat <<EOF >etc/config/acme
-config acme 'main'
-	option account_email 'r@${WRT_SECRET_TLD}'
-	option debug '0'
-
-config cert 'supasta'
-	option enabled '1'
-	option use_staging '0'
-	option keylength 'ec-384'
-	option validation_method 'dns'
-	option dns 'dns_cf'
-	option acme_server 'letsencrypt'
-	list domains '${WRT_SECRET_TLD}'
-	list domains '*.${WRT_SECRET_TLD}'
-	list credentials 'CF_Zone_ID="${WRT_CLOFA_ZO}"'
-	list credentials 'CF_Token="${WRT_CLOFA_TO}"'
-EOF
-
-# msmtprc:
-/usr/bin/env cat <<EOF >etc/msmtprc
-# msmtp relay config
-account default
-host ${WRT_SMTP_HOST}
-auth on
-user ${WRT_SMTP_LOGIN}
-password ${WRT_SMTP_PASSWD}
-domain ${WRT_HOSTNAME}.${WRT_SECRET_TLD}
-port 25
-tls on
-tls_starttls on
-tls_certcheck off
-from %U@${WRT_HOSTNAME}.${WRT_SECRET_TLD}
-allow_from_override on
-set_from_header on
-syslog LOG_MAIL
-EOF
 
 # dokodemo warp:
 warp_reg='/usr/bin/warp-reg'
@@ -416,10 +256,6 @@ config ipset 'vpn_${r}'
 	option table_family 'inet'
 	list name 'vpn4_${r}'
 	list name 'vpn6_${r}'
-	# list name 'tun2ray4'
-	# list name 'tun2ray6'
-	# list name 'tproxy4'
-	# list name 'tproxy6'
 EOF
 done
 
@@ -429,13 +265,11 @@ config ipset 'tun2ray4'
 	option name 'tun2ray4'
 	option family 'ipv4'
 	list match 'dst_net'
-	# option loadfile '/etc/nftsets/vpn4_m.txt'
 
 config ipset 'tun2ray6'
 	option name 'tun2ray6'
 	option family 'ipv6'
 	list match 'dst_net'
-	# option loadfile '/etc/nftsets/vpn6_m.txt'
 
 config rule 'mark4_lan_tun2ray'
 	option name 'mark4_lan_tun2ray'
@@ -526,42 +360,6 @@ nameserver 127.0.0.1
 nameserver ::1
 EOF
 
-# wifi config
-/usr/bin/env cat <<EOF >>etc/config/wireless
-
-config wifi-device 'radio0'
-	option type 'mac80211'
-	option path 'platform/soc/18000000.wifi'
-	option channel 'auto'
-	option band '2g'
-	option htmode 'HE20'
-	option cell_density '0'
-
-config wifi-iface 'default_radio0'
-	option device 'radio0'
-	option network 'lan'
-	option mode 'ap'
-	option ssid '${WRT_WIFI_SSID}2'
-	option encryption 'sae-mixed'
-	option key '${WRT_WIFI_KEY}'
-
-config wifi-device 'radio1'
-	option type 'mac80211'
-	option path 'platform/soc/18000000.wifi+1'
-	option channel 'auto'
-	option band '5g'
-	option htmode 'HE40'
-	option cell_density '0'
-
-config wifi-iface 'default_radio1'
-	option device 'radio1'
-	option network 'lan'
-	option mode 'ap'
-	option ssid '${WRT_WIFI_SSID}5'
-	option encryption 'sae-mixed'
-	option key '${WRT_WIFI_KEY}'
-EOF
-
 # shellcheck disable=2086
 IFS=',' read -ra array <<< "$(echo -n ${WRT_CLIENTS})"
 for c in "${array[@]}"; do
@@ -578,7 +376,7 @@ for c in "${array[@]}"; do
   echo "name: [${name}], mac: [${mac}], num: [${num}]"
 	/usr/bin/env cat <<EOF >>etc/config/dhcp
 
-config host
+config host '${name}'
 	option name '${name}'
 	option ip '${WRT_LAN3OCT}.${num}'
 	option mac '${mac}'

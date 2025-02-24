@@ -16,8 +16,13 @@ start_service() {
   procd_set_param respawn \
     ${respawn_threshold:-333} \
     ${respawn_timeout:-3} \
-    ${respawn_retry:-33}
-  procd_set_param command bash -c 'cd /opt/3x-ui && exec /opt/3x-ui/3x-ui 2>&1'
+    ${respawn_retry:-0}
+  procd_set_param command bash -c "cd ${XUI_DB_FOLDER} && exec /usr/bin/prlimit \
+    --nproc=32768:65536 --nofile=131072:524288 ${XUI_DB_FOLDER}/3x-ui 2>&1"
+  # nproc not working for some reason:
+  #procd_set_param limits nproc='32768 65536'
+  # working, however already set by prlimit:
+  #procd_set_param limits nofile='131072 524288'
   procd_close_instance
 }
 

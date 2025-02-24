@@ -1,0 +1,12 @@
+config vnstat
+	list interface 'br-lan'
+	list interface 'br-lan.5'
+	list interface 'br-lan.77'
+	list interface 'lan1'
+	list interface 'lan2'
+	list interface 'lan3'
+	list interface 'lan4'
+	list interface 'sfp2'
+	list interface 'wan'
+	list interface 'phy0-ap0'
+	list interface 'phy1-ap0'
