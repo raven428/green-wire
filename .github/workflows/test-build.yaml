@@ -27,4 +27,6 @@ jobs:
       - name: container image
         run: ./image.sh
       - name: device image
+        env:
+          WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
         run: ./build.sh
