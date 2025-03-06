@@ -14,7 +14,7 @@ core.register_action(
 )
 
 core.register_fetches(
-  "iso8601-now", function(txn)
+  "iso8601-now", function()
    return string.format(
       "%s.%03d",
       os.date("!%Y-%m-%dT%H:%M:%S"),
