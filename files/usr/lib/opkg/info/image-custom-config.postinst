@@ -366,6 +366,7 @@ for c in "${array[@]}"; do
   name="${c%@*}"
   name="${name#"${name%%[![:space:]]*}"}"
   name="${name%"${name##*[![:space:]]}"}"
+  ident="${name//[^a-zA-Z0-9_]/_}"
   temp="${c#*@}"
   mac="${temp%#*}"
   mac="${mac#"${mac%%[![:space:]]*}"}"
@@ -376,9 +377,10 @@ for c in "${array[@]}"; do
   echo "name: [${name}], mac: [${mac}], num: [${num}]"
 	/usr/bin/env cat <<EOF >>etc/config/dhcp
 
-config host '${name}'
+config host '${ident}'
 	option name '${name}'
 	option ip '${WRT_LAN3OCT}.${num}'
+	option hostid '${num}'
 	option mac '${mac}'
 	option dns '1'
 	option leasetime 'infinite'
@@ -403,23 +405,23 @@ EOF
 /usr/bin/env cat <<EOF >etc/ipsec.conf
 # ipsec config
 config setup
-  uniqueids=no
+	uniqueids=no
 conn prskt
-  authby=secret
-  auto=start
-  keyexchange=ikev1
-  type=transport
-  left=%defaultroute
-  leftprotoport=17/%any
-  right=${WRT_L2TP_SERVER}
-  rightid=%any
-  rightprotoport=17/1701
-  dpddelay=22
-  dpdtimeout=55
-  dpdaction=restart
-  keyingtries=0
-  lifetime=9999s
-  ikelifetime=11111s
+	authby=secret
+	auto=start
+	keyexchange=ikev1
+	type=transport
+	left=%defaultroute
+	leftprotoport=17/%any
+	right=${WRT_L2TP_SERVER}
+	rightid=%any
+	rightprotoport=17/1701
+	dpddelay=22
+	dpdtimeout=55
+	dpdaction=restart
+	keyingtries=0
+	lifetime=9999s
+	ikelifetime=11111s
 EOF
 echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >> etc/ipsec.secrets
 
