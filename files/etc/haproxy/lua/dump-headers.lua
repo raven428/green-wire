@@ -1,4 +1,5 @@
-core.register_service("dump_headers", "http", function(applet)
+-- selene: allow(undefined_variable)
+core.register_service("dump_headers", "http", function(applet) -- luacheck: ignore
   applet:set_status(200)
   applet:add_header("Content-Type", "text/plain")
   applet:add_header("Cache-Control", "no-cache")

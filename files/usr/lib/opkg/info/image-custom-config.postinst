@@ -25,8 +25,8 @@ EOF
 # replace network 3 octets:
 /usr/bin/env sed -i \
   "s/192.168.69/${WRT_LAN3OCT}/" \
-	etc/config/network \
-	etc/config/dhcp
+  etc/config/network \
+  etc/config/dhcp
 
 /usr/bin/env sed -i \
   "
@@ -92,7 +92,7 @@ for f in patches/*.diff; do
 done
 /usr/bin/env rm -rfv patches
 /usr/bin/env cat etc/ssl/private/main.crt \
-  etc/ssl/private/main.key > etc/ssl/private/main.pem
+  etc/ssl/private/main.key >etc/ssl/private/main.pem
 
 # dokodemo warp:
 warp_reg='/usr/bin/warp-reg'
@@ -143,7 +143,7 @@ done
 count=0
 for r in ${warp_regions}; do
   count=$((count + 1))
-	mtu='1300'
+  mtu='1300'
   [[ "$r" == "m" ]] && count=0 && mtu='1420'
   [[ -e "etc/nftsets/vpn4_${r}.txt" ]] ||
     /usr/bin/env cat <<EOF >>"etc/nftsets/vpn4_${r}.txt"
@@ -248,8 +248,8 @@ config rule 'mark6_int_${r}'
 	list proto 'all'
 EOF
   domain="${r}"
-	[[ ${r} == 'm' ]] && domain='main_nonexistent_domain'
-	/usr/bin/env cat <<EOF >>etc/config/dhcp
+  [[ ${r} == 'm' ]] && domain='main_nonexistent_domain'
+  /usr/bin/env cat <<EOF >>etc/config/dhcp
 
 config ipset 'vpn_${r}'
 	list domain '${domain}'
@@ -361,7 +361,7 @@ nameserver ::1
 EOF
 
 # shellcheck disable=2086
-IFS=',' read -ra array <<< "$(echo -n ${WRT_CLIENTS})"
+IFS=',' read -ra array <<<"$(echo -n ${WRT_CLIENTS})"
 for c in "${array[@]}"; do
   name="${c%@*}"
   name="${name#"${name%%[![:space:]]*}"}"
@@ -375,7 +375,7 @@ for c in "${array[@]}"; do
   num="${num#"${num%%[![:space:]]*}"}"
   num="${num%"${num##*[![:space:]]}"}"
   echo "name: [${name}], mac: [${mac}], num: [${num}]"
-	/usr/bin/env cat <<EOF >>etc/config/dhcp
+  /usr/bin/env cat <<EOF >>etc/config/dhcp
 
 config host '${ident}'
 	option name '${name}'
@@ -423,13 +423,13 @@ conn prskt
 	lifetime=9999s
 	ikelifetime=11111s
 EOF
-echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >> etc/ipsec.secrets
+echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
 
 # hide luci:
 /usr/bin/env mv -vf 'www/cgi-bin' "www/luci-cgi-${WRT_LUCI_CGI}"
 /usr/bin/env mv -vf 'www/luci-static' "www/luci-sta-${WRT_LUCI_STA}"
 /usr/bin/env rm -vf 'www/'* 'etc/haproxy.cfg' 'etc/uci-defaults/60_nginx-luci-support' \
-	etc/firewall.fail2ban etc/uci-defaults/99_fail2ban ||
+  etc/firewall.fail2ban etc/uci-defaults/99_fail2ban ||
   /usr/bin/env true
 /usr/bin/env rm -vfr 'etc/nginx/conf.d'
 

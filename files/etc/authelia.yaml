@@ -6,7 +6,7 @@ server:
   endpoints:
     authz:
       forward-auth:
-        implementation: 'ForwardAuth'
+        implementation: "ForwardAuth"
 log:
   level: "info"
   format: "text"
@@ -51,7 +51,8 @@ session:
   cookies:
     - name: "authelia_session"
       domain: "REPLACE_secret_tld_REPLACE"
-      authelia_url: "https://yau.REPLACE_secret_tld_REPLACE/autheliaReplaceAutheliaUriSecretReplace"
+      authelia_url: >-
+        https://yau.REPLACE_secret_tld_REPLACE/autheliaReplaceAutheliaUriSecretReplace
       same_site: "lax"
       inactivity: "55 minutes"
       expiration: "11 days"

@@ -10,7 +10,7 @@ yesim.co.uk
 silknet.com
 redhat.com
 
-# bybit – не добавлять, очень много доменов отснифалось
+# bybit – do not add, too much domains
 # bybit.com
 # bycsi.com
 # bytick.com
@@ -314,7 +314,7 @@ xoom.us
 xoomcom.com
 venmo.s3.amazonaws.com
 
-# huobi – не добавлять, много доменов отснифалось, не проходит капчу
+# huobi – do not add, too much domains, unable to pass captcha
 # htx.com
 # hbabit.com
 # hbfile.net
@@ -326,7 +326,7 @@ venmo.s3.amazonaws.com
 # huobigroup.com
 # huobitoken.com
 
-# okx – не добавлять, много доменов отснифалось, не проходит капчу
+# okx – do not add, too much domains, unable to pass captcha
 # okex.com
 # okx.com
 # okx-dns.com
@@ -334,7 +334,7 @@ venmo.s3.amazonaws.com
 # okx-dns2.com
 # oklink.com
 
-# binance – не добавлять, много доменов, адреса без доменов
+# binance – do not add, too much domains, addresses w/o domains
 # binance.cc
 # binance.charity
 # binance.cloud

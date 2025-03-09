@@ -60,14 +60,22 @@ for f in prepare/etc/dnsmasq.d/*.sets; do
   " -i "${f}"
 done
 /usr/bin/env mkdir -vp prepare/etc/opkg
-/usr/bin/env cat <<EOF >prepare/etc/opkg/distfeeds.conf
-src/gz openwrt_core      https://${WRT_OPKG_REPO}/releases/23.05.5/targets/mediatek/filogic/packages
-src/gz openwrt_base      https://${WRT_OPKG_REPO}/releases/23.05.5/packages/aarch64_cortex-a53/base
-src/gz openwrt_luci      https://${WRT_OPKG_REPO}/releases/23.05.5/packages/aarch64_cortex-a53/luci
-src/gz openwrt_routing   https://${WRT_OPKG_REPO}/releases/23.05.5/packages/aarch64_cortex-a53/routing
-src/gz openwrt_packages  https://${WRT_OPKG_REPO}/releases/23.05.5/packages/aarch64_cortex-a53/packages
-src/gz openwrt_telephony https://${WRT_OPKG_REPO}/releases/23.05.5/packages/aarch64_cortex-a53/telephony
-EOF
+{
+  r="${WRT_OPKG_REPO}"
+  printf "src/gz openwrt_core      \
+https://%s/releases/23.05.5/targets/mediatek/filogic/packages
+src/gz openwrt_base      \
+https://%s/releases/23.05.5/packages/aarch64_cortex-a53/base
+src/gz openwrt_luci      \
+https://%s/releases/23.05.5/packages/aarch64_cortex-a53/luci
+src/gz openwrt_routing   \
+https://%s/releases/23.05.5/packages/aarch64_cortex-a53/routing
+src/gz openwrt_packages  \
+https://%s/releases/23.05.5/packages/aarch64_cortex-a53/packages
+src/gz openwrt_telephony \
+https://%s/releases/23.05.5/packages/aarch64_cortex-a53/telephony
+" "${r}" "${r}" "${r}" "${r}" "${r}" "${r}"
+} >prepare/etc/opkg/distfeeds.conf
 /usr/bin/env docker run --user 0 --rm -i --network=host \
   -v "$(pwd)"/prepare:/files:rw \
   -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
