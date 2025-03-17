@@ -2,13 +2,16 @@
 set -ueo pipefail
 : "${XUI:="3x-ui"}"
 : "${XUIV:="${XUI}-2_4_5_qtg-arm64-static-musl"}"
-: "${XURI:="https://github.com/raven428/container-images/releases/download/000/${XUIV}.tar.xz"}"
+: "${XURI:="https://github.com/raven428/container-images/releases/\
+download/000/${XUIV}.tar.xz"}"
 : "${T2S:="tun2socks"}"
 : "${T2SV:="tun2socks-linux-arm64"}"
-: "${T2SU:="https://github.com/xjasonlyu/tun2socks/releases/download/v2.5.2/tun2socks-linux-arm64.zip"}"
+: "${T2SU:="https://github.com/xjasonlyu/tun2socks/releases/\
+download/v2.5.2/tun2socks-linux-arm64.zip"}"
 : "${AIA:="authelia"}"
 : "${AIAV:="authelia-linux-arm64-musl"}"
-: "${AIAU:="https://github.com/authelia/authelia/releases/download/v4.38.18/authelia-v4.38.18-linux-arm64-musl.tar.gz"}"
+: "${AIAU:="https://github.com/authelia/authelia/releases/\
+download/v4.38.18/authelia-v4.38.18-linux-arm64-musl.tar.gz"}"
 
 if [[ -n "${WRT_SET_PASSWD:-}" ]]; then
   /usr/bin/env printf "${WRT_SET_PASSWD}\n${WRT_SET_PASSWD}\n" |

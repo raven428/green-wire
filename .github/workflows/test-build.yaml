@@ -1,3 +1,4 @@
+# kics-scan disable=555ab8f9-2001-455e-a077-f2d0f41e2fb9
 name: test build
 on:
   push:
@@ -27,4 +28,19 @@ jobs:
       - name: container image
         run: ./image.sh
       - name: device image
+        env:
+          WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
         run: ./build.sh
+  linters:
+    name: check linters
+    timeout-minutes: 11
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - name: MegaLinter
+        uses: oxsecurity/megalinter@v8
+        env:
+          VALIDATE_ALL_CODEBASE: true

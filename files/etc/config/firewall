@@ -50,7 +50,7 @@ config rule
 	option target 'ACCEPT'
 	option src 'wan'
 	option proto 'tcp'
-	option dest_port '80 443 1443 5022'
+	option dest_port '80 443'
 	option name 'Allow-TCP-wan'
 
 config redirect 'transmission'

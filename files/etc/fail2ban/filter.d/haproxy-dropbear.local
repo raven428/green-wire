@@ -1,0 +1,6 @@
+# fail2ban filter configuration for haproxy dropbear auth
+[Definition]
+failregex = .+ dropbear\[\d+\]: [Ee]xit before auth from \<127\.0\.0\.1\:\d+\>.+<SKIPLINES>.+ haproxy\[\d+\]: <HOST>(:\d+) .+ fe_tcp be_tcp2ssh\/ssh .+
+
+[Init]
+maxlines = 5

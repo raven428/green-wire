@@ -2,11 +2,11 @@ config nlbwmon
 	# The buffer size for receiving netlink conntrack results, in bytes.
 	# If the chosen size is too small, accounting information might get
 	# lost, leading to skewed traffic counting results
-	option netlink_buffer_size 524288
+	option netlink_buffer_size 134217728
 
 	# Interval at which the temporary in-memory database is committed to
 	# the persistent database directory
-	option commit_interval 24h
+	option commit_interval 11h
 
 	# Interval at which traffic counters of still established connections
 	# are refreshed from netlink information
@@ -17,7 +17,7 @@ config nlbwmon
 
 	# Amount of database generations to retain. If the limit is reached,
 	# the oldest database files are deleted.
-	option database_generations 10
+	option database_generations 55
 
 	# Accounting period interval; may be either in the format YYYY-MM-DD/NN
 	# to start a new accounting period exactly every NN days, beginning at

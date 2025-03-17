@@ -4,7 +4,7 @@
 
 ## Build steps
 
-* clone me:
+- clone me:
 
   ```bash
   git clone --recursive \
@@ -12,14 +12,14 @@
   green-wire && cd green-wire
   ```
 
-* set [secrets for `build.sh`](/build.sh#L6-L33)
-* build images
+- set [secrets for `build.sh`](build.sh#L6-L33)
+- build images
 
   ```bash
   ./build.sh
   ```
 
-* flash image
+- flash image
 
   ```bash
   # either eMMC:

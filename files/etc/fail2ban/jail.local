@@ -53,6 +53,11 @@ enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="authelia2ban.map"]
 logpath = %(openwrt_system_log)s
 
+[haproxy-dropbear]
+enabled = true
+ipbanact = haproxy-deny-ip[blck_lst_name="dropbear.map"]
+logpath = %(openwrt_system_log)s
+
 [luci-uhttpd-auth]
 port = 5443
 enabled = false

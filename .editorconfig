@@ -1,0 +1,33 @@
+root = true
+
+[*]
+indent_size = 2
+indent_style = space
+end_of_line = lf
+max_line_length = 90
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[README.md]
+max_line_length = 222
+
+[{.gitmodules,files/etc/config/**}]
+indent_style = tab
+
+[files/usr/lib/opkg/info/image-custom-config.postinst]
+indent_style = ''
+
+[files/etc/{dnsmasq.d/addrs.conf,config/uhttpd,fail2ban/**}]
+max_line_length = 222
+
+[files/etc/haproxy/lua/{auth-request.lua,haproxy-lua-http/http.lua}]
+max_line_length = 222
+
+[{.gitleaksignore,image/Dockerfile}]
+max_line_length = 222
+
+[files/etc/haproxy/haproxy.cfg]
+max_line_length = 333
+
+[files/etc/nftsets/vpn{4,6}_m.txt]
+max_line_length = 111

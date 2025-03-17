@@ -1,0 +1,5 @@
+https://www.rockblack.su
+https://servers.opennicproject.org
+smtp://REPLACE_SMTP_host_REPLACE:25
+file:///tmp/lint/files/etc/tcp:/:9091/autheliaReplaceAutheliaUriSecretReplace
+file:///github/workspace/files/etc/tcp:/:9091/autheliaReplaceAutheliaUriSecretReplace

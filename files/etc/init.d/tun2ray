@@ -14,6 +14,6 @@ start_service() {
     ${respawn_retry:-0}
   procd_set_param command \
     /opt/bin/tun2socks -device 'tun://tun2ray' \
-    -proxy 'socks5://tun2socks:kWOGr2ysCA@127.0.0.1:19645'
+    -proxy 'socks5://tun2socks:kWOGr2ysCA@127.0.0.1:19645' # secretlint-disable-line
   procd_close_instance
 }
