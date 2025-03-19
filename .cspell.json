@@ -517,7 +517,13 @@
     "новости",
     "подсистемы",
     "роботов",
-    "служба"
+    "служба",
+    "INFISICAL",
+    "grewi",
+    "ncipollo",
+    "squashfs",
+    "sysupgrade",
+    "zcat"
   ],
   "enabled": true
 }
