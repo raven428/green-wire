@@ -30,6 +30,7 @@ jobs:
         with:
           name: device images v${{ github.ref_name }}
           allowUpdates: true
+          tag: rel${{ github.ref_name }}
           artifacts: "upload/*"
           repo: "green-wise"
           token: "${{ secrets.REGISTRY_WRITER }}"
