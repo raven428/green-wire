@@ -16,7 +16,14 @@
 - build images
 
   ```bash
-  ./build.sh
+  VER=023 ./build.sh
+  ```
+
+- make tag and send to release:
+
+  ```bash
+  export VER=023 && git checkout master && git pull
+  git tag -fm master ${VER} && git push --force origin ${VER}
   ```
 
 - flash image

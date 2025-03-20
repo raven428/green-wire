@@ -1,4 +1,5 @@
 # kics-scan disable=555ab8f9-2001-455e-a077-f2d0f41e2fb9
+---
 name: test build
 on:
   push:
@@ -10,10 +11,10 @@ on:
 jobs:
   test-build:
     name: test build
-    timeout-minutes: 33
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout the repos
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -27,10 +28,33 @@ jobs:
           password: ${{ secrets.REGISTRY_WRITER }}
       - name: container image
         run: ./image.sh
-      - name: device image
+      - name: build device images
         env:
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
           WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
         run: ./build.sh
+      - name: release device images
+        if: >-
+          github.event_name == 'pull_request' ||
+          (github.event_name == 'schedule' || github.event_name == 'push')
+          && github.ref == 'refs/heads/master'
+        uses: ncipollo/release-action@v1
+        with:
+          name: >
+            branch [${{
+              github.head_ref == '' && github.ref_name || github.head_ref
+            }}] images
+          draft: true
+          allowUpdates: true
+          tag: rel999
+          artifacts: "upload/*"
+          repo: "green-wise"
+          token: "${{ secrets.REGISTRY_WRITER }}"
+          body: >
+            branch [${{
+              github.head_ref == '' && github.ref_name || github.head_ref
+            }}] images from recent commit by GitHub actions
   linters:
     name: check linters
     timeout-minutes: 11

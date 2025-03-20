@@ -1,0 +1,36 @@
+# kics-scan disable=555ab8f9-2001-455e-a077-f2d0f41e2fb9
+---
+name: upload release
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  release:
+    name: build and release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: checkout the repos
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: recursive
+      - name: build device images
+        env:
+          VER: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
+          WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
+        run: ./build.sh
+      - name: release device images
+        uses: ncipollo/release-action@v1
+        with:
+          name: device images v${{ github.ref_name }}
+          allowUpdates: true
+          artifacts: "upload/*"
+          repo: "green-wise"
+          token: "${{ secrets.REGISTRY_WRITER }}"
+          body: version ${{ github.ref_name }} of device images
