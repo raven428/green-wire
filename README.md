@@ -12,17 +12,17 @@
   green-wire && cd green-wire
   ```
 
-- set [secrets for `build.sh`](build.sh#L6-L33)
+- set [secrets for `build.sh`](build.sh#L41-L71) in `green-wise/OpenWRT/name.sh`
 - build images
 
   ```bash
-  VER=023 ./build.sh
+  VER=024 ./build.sh
   ```
 
-- make tag and send to release:
+- or make tag and send to release:
 
   ```bash
-  export VER=023 && git checkout master && git pull
+  export VER=024 && git checkout master && git pull
   git tag -fm master ${VER} && git push --force origin ${VER}
   ```
 
@@ -30,8 +30,10 @@
 
   ```bash
   # either eMMC:
-  dd if=openwrt-23.05.5-mediatek-filogic-bananapi_bpi-r3-sdcard.img of=/dev/mmcblk0
+  dd if=upload/bpi_r3-rel${VER}-name-*-image.img of=/dev/mmcblk0
 
   # or sdcard:
-  dd if=openwrt-23.05.5-mediatek-filogic-bananapi_bpi-r3-sdcard.img of=/dev/sda
+  dd if=upload/bpi_r3-rel${VER}-name-*-image.img of=/dev/sda
   ```
+
+  Also, `upload/bpi_r3-rel${VER}-name-*-sysupgrade.itb` could be installed through sysupgrade. However, no re-partition will be performed in this case
