@@ -24,9 +24,12 @@ EOF
 
 # replace network 3 octets:
 /usr/bin/env sed -i \
-  "s/192.168.69/${WRT_LAN3OCT}/" \
-  etc/config/network \
-  etc/config/dhcp
+  "
+		s/192.168.69/${WRT_LAN3OCT}/g ;
+		s/REPLACE_device_mac_REPLACE/${WRT_DEVICE_MAC}/g ;
+  " \
+  'etc/config/network' \
+  'etc/config/dhcp'
 
 /usr/bin/env sed -i \
   "
@@ -48,17 +51,17 @@ EOF
     s/REPLACE_wifi_key_REPLACE/${WRT_WIFI_KEY}/g ;
   " \
   'etc/fail2ban/filter.d/'*.local \
-  etc/dnsmasq.d/addrs.conf \
-  etc/haproxy/haproxy.cfg \
-  etc/dnsmasq.d/m.sets \
-  etc/config/wireless \
-  etc/config/system \
-  etc/config/uhttpd \
-  etc/config/luci \
-  etc/config/acme \
-  etc/config/ddns \
-  etc/msmtprc \
-  etc/authelia.yaml
+  'etc/dnsmasq.d/addrs.conf' \
+  'etc/haproxy/haproxy.cfg' \
+  'etc/dnsmasq.d/m.sets' \
+  'etc/config/wireless' \
+  'etc/config/system' \
+  'etc/config/uhttpd' \
+  'etc/config/luci' \
+  'etc/config/acme' \
+  'etc/config/ddns' \
+  'etc/msmtprc' \
+  'etc/authelia.yaml'
 
 # add hotplug debug log:
 # shellcheck disable=2016
