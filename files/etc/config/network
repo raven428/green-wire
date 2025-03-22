@@ -77,7 +77,7 @@ config bridge-vlan 'lan77'
 	list ports 'lan3'
 	list ports 'lan4'
 	list ports 'sfp2'
-	list ports 'wan:t'
+	list ports 'wan:t' # lan tag on wan port
 
 config bridge-vlan 'wan5'
 	option device 'br-lan'

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 set -ueo pipefail
-: "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
 [[ -d 'green-wise' ]] ||
   /usr/bin/env git clone "https://${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
 file_base=${NAME2BUILD:-"werter"}
 conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
 source "${conf_file}"
+: "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
 for secret in ${secrets}; do
@@ -34,7 +34,7 @@ grewi-${file_base}-${secret}" \
     )"
 done
 /usr/bin/env printf "\n———⟨ building [%s] image ⟩———\n" "${file_base}"
-/usr/bin/env rm -rf prepare
+/usr/bin/env rm -rf prepare release
 /usr/bin/env cp -r files prepare
 /usr/bin/env cat <<EOF >prepare/etc/secrets.sh
 export WRT_GREWIBU='${VER:-"999"}'
@@ -62,6 +62,7 @@ export WRT_AUTHELIA_DBKEY='${WRT_AUTHELIA_DBKEY:-"s3cre1DaTabKe4Authe1ia4pr0tect
 export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"123.321.231.132"}'
 export WRT_L2TP_LOGIN='${WRT_L2TP_LOGIN:-"l2tp-user"}'
 export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
+export WRT_LAN2WAN_TAG='${WRT_LAN2WAN_TAG:-"null"}'
 export WRT_IPSEC_PSK='${WRT_IPSEC_PSK:-"s3cre1P5k4ipSek4pr0tect"}'
 export WRT_WARP_REG='${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}'
 export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
@@ -104,7 +105,7 @@ src/gz openwrt_routing   ${r}/packages/aarch64_cortex-a53/routing
 src/gz openwrt_packages  ${r}/packages/aarch64_cortex-a53/packages
 src/gz openwrt_telephony ${r}/packages/aarch64_cortex-a53/telephony
 EOF
-/usr/bin/env docker run --user 0 --rm -i --network=host \
+/usr/bin/env docker run --user 0 --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw \
   -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
   ghcr.io/raven428/container-images/openwrt-imagebuilder/mediatek-filogic-23_05_5 \
