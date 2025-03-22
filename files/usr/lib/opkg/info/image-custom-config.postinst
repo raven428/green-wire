@@ -428,6 +428,10 @@ conn prskt
 EOF
 echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
 
+# removing lan tag on wan port:
+[[ ${WRT_LAN2WAN_TAG:-"null"} == 'null' ]] && /usr/bin/env sed \
+  -i '/[[:space:]]*# lan tag on wan port$/d' 'etc/config/network'
+
 # hide luci:
 /usr/bin/env mv -vf 'www/cgi-bin' "www/luci-cgi-${WRT_LUCI_CGI}"
 /usr/bin/env mv -vf 'www/luci-static' "www/luci-sta-${WRT_LUCI_STA}"
@@ -444,4 +448,4 @@ echo "OPENWRT_GREWIBU='${WRT_GREWIBU}'" >>etc/os-release
   etc/banner
 
 # copy for observation
-cp -rv etc /builder/bin/targets/mediatek/filogic
+/usr/bin/env cp -r etc /builder/bin/targets/mediatek/filogic
