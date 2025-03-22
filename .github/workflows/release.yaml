@@ -6,11 +6,44 @@ on:
     tags:
       - "*"
 jobs:
-  release:
-    name: build and release
+  define-matrix:
+    name: define matrix
+    timeout-minutes: 11
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      matrix_list: ${{ steps.define-matrix.outputs.matrix_list }}
+    steps:
+      - name: checkout the repos
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: true
+      - name: define matrix
+        id: define-matrix
+        env:
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
+        run: |
+          source ./matrix.sh
+          echo "matrix_list=${JSON_LIST}" >> "${GITHUB_OUTPUT}"
+      - name: create release
+        uses: ncipollo/release-action@v1
+        with:
+          name: device images v${{ github.ref_name }}
+          allowUpdates: true
+          tag: rel${{ github.ref_name }}
+          repo: "green-wise"
+          token: "${{ secrets.REGISTRY_WRITER }}"
+          body: version ${{ github.ref_name }} of device images
+  release:
+    name: "[${{ matrix.element }}] release"
+    timeout-minutes: 22
+    needs: define-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        element: ${{ fromJSON(needs.define-matrix.outputs.matrix_list) }}
+    runs-on: ubuntu-latest
     steps:
       - name: checkout the repos
         uses: actions/checkout@v4
@@ -18,14 +51,14 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           submodules: recursive
-      - name: build device images
+      - name: build [${{ matrix.element }}] image
         env:
           VER: ${{ github.ref_name }}
           GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
           WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
           INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
-        run: ./build.sh
-      - name: release device images
+        run: NAME2BUILD='${{ matrix.element }}' ./build.sh
+      - name: release [${{ matrix.element }}] image
         uses: ncipollo/release-action@v1
         with:
           name: device images v${{ github.ref_name }}
