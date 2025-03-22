@@ -63,6 +63,7 @@ export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"123.321.231.132"}'
 export WRT_L2TP_LOGIN='${WRT_L2TP_LOGIN:-"l2tp-user"}'
 export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
 export WRT_LAN2WAN_TAG='${WRT_LAN2WAN_TAG:-"null"}'
+export WRT_ACME_STAR='${WRT_ACME_STAR:-"null"}'
 export WRT_IPSEC_PSK='${WRT_IPSEC_PSK:-"s3cre1P5k4ipSek4pr0tect"}'
 export WRT_WARP_REG='${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}'
 export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,

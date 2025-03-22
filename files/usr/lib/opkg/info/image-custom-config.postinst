@@ -118,7 +118,8 @@ ipv6="$(
   /usr/bin/env printf "%s\n" "${reg_data}" |
     /usr/bin/env awk '{ if ($1=="v6:") print $2 }'
 )"
-if [[ -z "${pvk}" ]]; then
+[[ -z "${pvk}" ]] && {
+
   echo 'warp-reg failed… falling back to WRT_WARP_REG env:'
   # shellcheck disable=2016
   ipv4="$(
@@ -135,7 +136,7 @@ if [[ -z "${pvk}" ]]; then
     echo "${WRT_WARP_REG}" |
       /usr/bin/env awk -F , '{ print $3 }'
   )"
-fi
+}
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
 warp_regions='m tr cy kz ge de us ng cl bg it ar uy se nl cz'
 for r in ${warp_regions}; do
@@ -431,6 +432,16 @@ echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
 # removing lan tag on wan port:
 [[ ${WRT_LAN2WAN_TAG:-"null"} == 'null' ]] && /usr/bin/env sed \
   -i '/[[:space:]]*# lan tag on wan port$/d' 'etc/config/network'
+
+# add domains list to acme:
+if [[ ${WRT_ACME_STAR:-"null"} == 'null' ]]; then
+  echo "	list domains '${WRT_HOSTNAME}.${WRT_SECRET_TLD}'" >>etc/config/acme
+else
+	/usr/bin/env cat <<EOF >>etc/config/acme
+	list domains '${WRT_SECRET_TLD}'
+	list domains '*.${WRT_SECRET_TLD}'
+EOF
+fi
 
 # hide luci:
 /usr/bin/env mv -vf 'www/cgi-bin' "www/luci-cgi-${WRT_LUCI_CGI}"
