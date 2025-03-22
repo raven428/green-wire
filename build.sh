@@ -6,6 +6,7 @@ file_base=${NAME2BUILD:-"werter"}
 conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
 source "${conf_file}"
+: "${VER:="999"}"
 : "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
@@ -37,7 +38,7 @@ done
 /usr/bin/env rm -rf prepare release
 /usr/bin/env cp -r files prepare
 /usr/bin/env cat <<EOF >prepare/etc/secrets.sh
-export WRT_GREWIBU='${VER:-"999"}'
+export WRT_GREWIBU='${VER}'
 export WRT_ROOT_PASSWD='${WRT_DEF_PASSWD:-"luc1-r00t+pa5Swd"}'
 export WRT_LUCI_CGI='${WRT_LUCI_CGI:-"cgi-bin"}'
 export WRT_LUCI_STA='${WRT_LUCI_STA:-"luci-static"}'
@@ -59,7 +60,7 @@ export WRT_AUTHELIA_URI='${WRT_AUTHELIA_URI:-"s3cre1pathtAuthe1iaURI4pr0tect"}'
 export WRT_AUTHELIA_JWT='${WRT_AUTHELIA_JWT:-"s3cre1jwt0kenAuthe1ia4pr0tect"}'
 export WRT_AUTHELIA_SES='${WRT_AUTHELIA_SES:-"s3cre1se5si0ntAuthe1ia4pr0tect"}'
 export WRT_AUTHELIA_DBKEY='${WRT_AUTHELIA_DBKEY:-"s3cre1DaTabKe4Authe1ia4pr0tect"}'
-export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"123.321.231.132"}'
+export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"10.23.45.67"}'
 export WRT_L2TP_LOGIN='${WRT_L2TP_LOGIN:-"l2tp-user"}'
 export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
 export WRT_LAN2WAN_TAG='${WRT_LAN2WAN_TAG:-"null"}'
@@ -112,8 +113,8 @@ EOF
   ghcr.io/raven428/container-images/openwrt-imagebuilder/mediatek-filogic-23_05_5 \
   /usr/bin/env bash -c " \
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
-  make image PROFILE='bananapi_bpi-r3' FILES='/files' \
-  ROOTFS_PARTSIZE='2222' EXTRA_PARTSIZE='5155' \
+  make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
+  EXTRA_PARTSIZE='5155' EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
   PACKAGES='-dnsmasq atop lsblk mmc-utils ca-certificates bsdtar ack mtr-json haproxy \
   acme-acmesh-dnsapi netatop bind-dig bind-host bind-nslookup bird2 bird2c bird2cl \
   blkid block-mount bsdiff bspatch btop cfdisk cgdisk clocate conntrack ctop iconv \
@@ -204,7 +205,7 @@ version_number="$(/usr/bin/env jq -r '.version_number' release/profiles.json)"
     exit 2
   }
 /usr/bin/env mkdir -vp "upload"
-dest_prefix="upload/${device_id//[^0-9a-zA-Z]/_}-rel${VER:-999}-${file_base}-\
+dest_prefix="upload/${device_id//[^0-9a-zA-Z]/_}-rel${VER}-${file_base}-\
 ${version_number//[^0-9a-zA-Z]/_}-${version_code//[^0-9a-zA-Z]/_}"
 /usr/bin/env cp -vf "release/${image_prefix}-squashfs-sysupgrade.itb" \
   "${dest_prefix}-sysupgrade.itb"
