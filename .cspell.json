@@ -523,7 +523,14 @@
     "ncipollo",
     "squashfs",
     "sysupgrade",
-    "zcat"
+    "zcat",
+    "vfat",
+    "usbutils",
+    "smartmontools",
+    "growfs",
+    "exfat",
+    "msdos",
+    "ntfs"
   ],
   "enabled": true
 }

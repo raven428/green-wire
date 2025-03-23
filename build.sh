@@ -127,7 +127,8 @@ EOF
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
-  logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl \
+  logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
+  usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
@@ -152,7 +153,8 @@ EOF
   coreutils-users coreutils-vdir coreutils-wc coreutils-who coreutils-whoami \
   coreutils-yes net-tools-route \
   \
-  kmod-nft-tproxy kmod-dummy kmod-tun stress-ng stress \
+  kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
+  kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
   \
   shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
   \
