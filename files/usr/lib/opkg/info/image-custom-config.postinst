@@ -138,14 +138,14 @@ ipv6="$(
   )"
 }
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
-warp_regions='m tr cy kz ge de us ng cl bg it ar uy se nl cz'
-for r in ${warp_regions}; do
+for r in ${WRT_WARP_REGIONS}; do
   /usr/bin/env cat <<EOF >>etc/config/firewall
 	list network 'wgcf${r}'
 EOF
 done
 count=0
-for r in ${warp_regions}; do
+amount=$(echo "${WRT_WARP_REGIONS}" | /usr/bin/env tr ' ' '\n' | /usr/bin/env wc -l)
+for r in ${WRT_WARP_REGIONS} ${WRT_OTHER_ROUTES}; do
   count=$((count + 1))
   mtu='1300'
   [[ "$r" == "m" ]] && count=0 && mtu='1420'
@@ -159,7 +159,8 @@ EOF
 EOF
   port="$(/usr/bin/env printf '%03d' "$count")"
   mark="$(/usr/bin/env printf '%02d' "$count")"
-  /usr/bin/env cat <<EOF >>etc/config/network
+  [[ ${count} -lt ${amount} ]] && {
+    /usr/bin/env cat <<EOF >>etc/config/network
 
 config interface 'wgcf${r}'
 	option proto 'wireguard'
@@ -178,6 +179,9 @@ config wireguard_wgcf${r} 'wgserver${r}'
 	option route_allowed_ips '0'
 	list allowed_ips '0.0.0.0/0'
 	list allowed_ips '::/0'
+EOF
+}
+  /usr/bin/env cat <<EOF >>etc/config/network
 
 config rule 'wgcf4ru_${r}'
 	option name 'mark-${r}'
@@ -261,6 +265,7 @@ config ipset 'vpn_${r}'
 	list name 'vpn4_${r}'
 	list name 'vpn6_${r}'
 EOF
+  echo "1${mark} vpn_${r}" >>etc/iproute2/rt_tables
 done
 
 /usr/bin/env cat <<EOF >>etc/config/firewall
