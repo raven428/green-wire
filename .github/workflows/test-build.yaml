@@ -9,8 +9,9 @@ on:
   schedule:
     - cron: "11 11 * * 1"
 jobs:
-  test-build:
-    name: test build
+  container-image:
+    name: container image
+    timeout-minutes: 11
     runs-on: ubuntu-latest
     steps:
       - name: checkout the repos
@@ -28,13 +29,49 @@ jobs:
           password: ${{ secrets.REGISTRY_WRITER }}
       - name: container image
         run: ./image.sh
-      - name: build device images
+  define-matrix:
+    name: define matrix
+    timeout-minutes: 11
+    runs-on: ubuntu-latest
+    outputs:
+      matrix_list: ${{ steps.define-matrix.outputs.matrix_list }}
+    steps:
+      - name: checkout the repos
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: true
+      - name: define matrix
+        id: define-matrix
+        env:
+          GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
+        run: |
+          source ./matrix.sh
+          echo "matrix_list=${JSON_LIST}" >> "${GITHUB_OUTPUT}"
+  device-images:
+    name: "[${{ matrix.element }}] image"
+    timeout-minutes: 22
+    needs: define-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        element: ${{ fromJSON(needs.define-matrix.outputs.matrix_list) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout the repos
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          submodules: recursive
+      - name: build [${{ matrix.element }}] image
         env:
           GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
           WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
           INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
-        run: ./build.sh
-      - name: release device images
+        run: NAME2BUILD='${{ matrix.element }}' ./build.sh
+      - name: release [${{ matrix.element }}] image
         if: >-
           github.event_name == 'pull_request' ||
           (github.event_name == 'schedule' || github.event_name == 'push')
@@ -58,9 +95,10 @@ jobs:
   linters:
     name: check linters
     timeout-minutes: 11
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: checkout the repos
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
