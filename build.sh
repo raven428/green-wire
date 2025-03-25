@@ -34,6 +34,21 @@ grewi-${file_base}-${secret}" \
         /usr/bin/env tr -d '\n'
     )"
 done
+# shellcheck disable=2086
+IFS=',' read -ra array <<<"$(echo -n ${WRT_CLIENTS})"
+for c in "${array[@]}"; do
+  name="${c%@*}"
+  name="${name#"${name%%[![:space:]]*}"}"
+  name="${name%"${name##*[![:space:]]}"}"
+  temp="${c#*@}"
+  mac="${temp%#*}"
+  mac="${mac#"${mac%%[![:space:]]*}"}"
+  mac="${mac%"${mac##*[![:space:]]}"}"
+  echo "::add-mask::${name}"
+  for m in ${mac}; do
+    echo "::add-mask::${m}"
+  done
+done
 /usr/bin/env printf "\n———⟨ building [%s] image ⟩———\n" "${file_base}"
 /usr/bin/env rm -rf prepare release
 /usr/bin/env cp -r files prepare
