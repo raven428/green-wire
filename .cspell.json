@@ -530,7 +530,9 @@
     "growfs",
     "exfat",
     "msdos",
-    "ntfs"
+    "ntfs",
+    "noscan",
+    "nvme"
   ],
   "enabled": true
 }
