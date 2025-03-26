@@ -22,17 +22,11 @@ rm -fv "etc/secrets.sh"
 59 23 * * * /etc/init.d/atop restart
 EOF
 
-# replace network 3 octets:
+# replace placeholders:
 /usr/bin/env sed -i \
   "
 		s/192.168.69/${WRT_LAN3OCT}/g ;
 		s/REPLACE_device_mac_REPLACE/${WRT_DEVICE_MAC}/g ;
-  " \
-  'etc/config/network' \
-  'etc/config/dhcp'
-
-/usr/bin/env sed -i \
-  "
     s/REPLACE_hostname_REPLACE/${WRT_HOSTNAME}/g ;
     s/REPLACE_SMTP_host_REPLACE/${WRT_SMTP_HOST}/g ;
     s/REPLACE_SMTP_login_REPLACE/${WRT_SMTP_LOGIN}/g ;
@@ -55,8 +49,10 @@ EOF
   'etc/haproxy/haproxy.cfg' \
   'etc/dnsmasq.d/m.sets' \
   'etc/config/wireless' \
+  'etc/config/network' \
   'etc/config/system' \
   'etc/config/uhttpd' \
+  'etc/config/dhcp' \
   'etc/config/luci' \
   'etc/config/acme' \
   'etc/config/ddns' \
