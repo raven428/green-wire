@@ -15,6 +15,6 @@ start_service() {
     ${respawn_threshold:-333} \
     ${respawn_timeout:-3} \
     ${respawn_retry:-0}
-  procd_set_param command /usr/bin/atop -w "${ATOP_DIR2RAW}/raw_$(date '+%Y%m%d')" 600
+  procd_set_param command /usr/bin/atop -w "${ATOP_DIR2RAW}/raw_$(date '+%Y%m%d')" 60
   procd_close_instance
 }
