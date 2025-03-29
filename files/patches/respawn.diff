@@ -26,3 +26,58 @@
          procd_set_param file "$stubby_config"
          procd_set_param stdout 1
          procd_set_param stderr 1
+
+--- etc/init.d/uwsgi-orig	2024-09-23 12:34:46.000000000 +0000
++++ etc/init.d/uwsgi	2025-01-03 12:55:40.000000000 +0000
+@@ -7,7 +7,11 @@
+ 	procd_open_instance
+ 	procd_set_param command /usr/sbin/uwsgi --ini /etc/uwsgi/emperor.ini
+ 	procd_set_param stderr 1
++	procd_set_param stdout 1
+ 	procd_set_param file /etc/uwsgi/emperor.ini
+-	procd_set_param respawn
++	procd_set_param respawn \
++		${respawn_threshold:-333} \
++		${respawn_timeout:-3} \
++		${respawn_retry:-0}
+ 	procd_close_instance
+ }
+
+--- etc/init.d/collectd-orig	2024-09-23 12:34:46.000000000 +0000
++++ etc/init.d/collectd	2025-03-29 05:57:14.000000000 +0000
+@@ -597,7 +597,10 @@
+ 	procd_append_param command -f # don't daemonize
+ 	procd_set_param nice "$NICEPRIO"
+ 	procd_set_param stderr 1
+-	procd_set_param respawn
++	procd_set_param respawn \
++		${respawn_threshold:-333} \
++		${respawn_timeout:-3} \
++		${respawn_retry:-0}
+ 	procd_close_instance
+ }
+
+--- etc/init.d/fail2ban-orig	2024-09-23 12:34:46.000000000 +0000
++++ etc/init.d/fail2ban	2025-03-29 05:59:11.000000000 +0000
+@@ -31,6 +31,7 @@
+ 	init_config
+
+ 	mkdir -m 0755 -p "${RUNDIR}"
++	ln -sfv /opt/var/log/system.log /var/log/system.log
+
+ 	procd_open_instance
+
+@@ -46,8 +47,11 @@
+ 	procd_set_param file ${CONFDIR}/*.local
+
+ 	procd_set_param command /usr/bin/fail2ban-server -xf -p "${RUNDIR}/fail2ban.pid" -s "${RUNDIR}/fail2ban.sock" start
+-	procd_set_param respawn ${respawn_threshold:-3600} ${respawn_timeout:-5} ${respawn_retry:-5}
+-	procd_close_instance
++	procd_set_param respawn \
++		${respawn_threshold:-333} \
++		${respawn_timeout:-3} \
++		${respawn_retry:-0}
++	ocd_close_instance
+ }
+
+ reload_service()

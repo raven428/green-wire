@@ -13,6 +13,7 @@ max_line_length = 222
 
 [{.gitmodules,files/etc/config/**}]
 indent_style = tab
+max_line_length = 222
 
 [files/usr/lib/opkg/info/image-custom-config.postinst]
 indent_style = ''

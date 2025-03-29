@@ -29,6 +29,11 @@ echo "adding [${uci_record}] uci record" | tee /dev/kmsg
 /usr/bin/env uci set "fstab.${uci_record}.target"='/extra'
 /usr/bin/env uci set "fstab.${uci_record}.label"='extra'
 /usr/bin/env uci set "fstab.${uci_record}.enable"='1'
+uci_record="$(/usr/bin/env uci add fstab mount)"
+/usr/bin/env mkdir -vp /nvme | tee /dev/kmsg
+/usr/bin/env uci set "fstab.${uci_record}.target"='/nvme'
+/usr/bin/env uci set "fstab.${uci_record}.label"='nvme'
+/usr/bin/env uci set "fstab.${uci_record}.enable"='1'
 /usr/bin/env uci commit
 /usr/bin/env block mount
 if [[ ${move_home} == 1 ]]; then

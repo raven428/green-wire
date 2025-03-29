@@ -41,6 +41,8 @@ config dhcp 'lan'
 	list dhcp_option '44,192.168.77.114'  # netbios-name-servers (WINS)
 	list dhcp_option '45,192.168.77.114'  # netbios-dd-server
 	list dhcp_option '46,8'               # netbios-node-type (8 = H-node)
+	list dhcp_option '15,lan'
+	list dhcp_option '119,local,REPLACE_secret_tld_REPLACE,home.REPLACE_secret_tld_REPLACE,local.REPLACE_secret_tld_REPLACE'
 
 config dhcp 'wan'
 	option interface 'wan'

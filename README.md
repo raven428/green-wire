@@ -16,13 +16,13 @@
 - build images
 
   ```bash
-  VER=024 ./build.sh
+  VER=025 ./build.sh
   ```
 
 - or make tag and send to release:
 
   ```bash
-  export VER=024 && git checkout master && git pull
+  export VER=025 && git checkout master && git pull
   git tag -fm master ${VER} && git push --force origin ${VER}
   ```
 

@@ -22,17 +22,11 @@ rm -fv "etc/secrets.sh"
 59 23 * * * /etc/init.d/atop restart
 EOF
 
-# replace network 3 octets:
+# replace placeholders:
 /usr/bin/env sed -i \
   "
 		s/192.168.69/${WRT_LAN3OCT}/g ;
 		s/REPLACE_device_mac_REPLACE/${WRT_DEVICE_MAC}/g ;
-  " \
-  'etc/config/network' \
-  'etc/config/dhcp'
-
-/usr/bin/env sed -i \
-  "
     s/REPLACE_hostname_REPLACE/${WRT_HOSTNAME}/g ;
     s/REPLACE_SMTP_host_REPLACE/${WRT_SMTP_HOST}/g ;
     s/REPLACE_SMTP_login_REPLACE/${WRT_SMTP_LOGIN}/g ;
@@ -55,8 +49,10 @@ EOF
   'etc/haproxy/haproxy.cfg' \
   'etc/dnsmasq.d/m.sets' \
   'etc/config/wireless' \
+  'etc/config/network' \
   'etc/config/system' \
   'etc/config/uhttpd' \
+  'etc/config/dhcp' \
   'etc/config/luci' \
   'etc/config/acme' \
   'etc/config/ddns' \
@@ -138,14 +134,14 @@ ipv6="$(
   )"
 }
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
-warp_regions='m tr cy kz ge de us ng cl bg it ar uy se nl cz'
-for r in ${warp_regions}; do
+for r in ${WRT_WARP_REGIONS}; do
   /usr/bin/env cat <<EOF >>etc/config/firewall
 	list network 'wgcf${r}'
 EOF
 done
 count=0
-for r in ${warp_regions}; do
+amount=$(echo "${WRT_WARP_REGIONS}" | /usr/bin/env tr ' ' '\n' | /usr/bin/env wc -l)
+for r in ${WRT_WARP_REGIONS} ${WRT_OTHER_ROUTES}; do
   count=$((count + 1))
   mtu='1300'
   [[ "$r" == "m" ]] && count=0 && mtu='1420'
@@ -159,7 +155,8 @@ EOF
 EOF
   port="$(/usr/bin/env printf '%03d' "$count")"
   mark="$(/usr/bin/env printf '%02d' "$count")"
-  /usr/bin/env cat <<EOF >>etc/config/network
+  [[ ${count} -lt ${amount} ]] && {
+    /usr/bin/env cat <<EOF >>etc/config/network
 
 config interface 'wgcf${r}'
 	option proto 'wireguard'
@@ -178,6 +175,9 @@ config wireguard_wgcf${r} 'wgserver${r}'
 	option route_allowed_ips '0'
 	list allowed_ips '0.0.0.0/0'
 	list allowed_ips '::/0'
+EOF
+  }
+  /usr/bin/env cat <<EOF >>etc/config/network
 
 config rule 'wgcf4ru_${r}'
 	option name 'mark-${r}'
@@ -261,6 +261,7 @@ config ipset 'vpn_${r}'
 	list name 'vpn4_${r}'
 	list name 'vpn6_${r}'
 EOF
+  echo "1${mark} vpn_${r}" >>etc/iproute2/rt_tables
 done
 
 /usr/bin/env cat <<EOF >>etc/config/firewall
@@ -392,7 +393,10 @@ EOF
 done
 
 # l2tp thru ipsec
-/usr/bin/env cat <<EOF >>etc/config/network
+[[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
+  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
+  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
+  /usr/bin/env cat <<EOF >>etc/config/network
 
 config interface 'prskt'
 	option proto 'l2tp'
@@ -406,7 +410,10 @@ config interface 'prskt'
 	option auto '1'
 	option ipv6 '0'
 EOF
-/usr/bin/env cat <<EOF >etc/ipsec.conf
+}
+[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
+  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
+  /usr/bin/env cat <<EOF >etc/ipsec.conf
 # ipsec config
 config setup
 	uniqueids=no
@@ -427,7 +434,8 @@ conn prskt
 	lifetime=9999s
 	ikelifetime=11111s
 EOF
-echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
+  echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
+}
 
 # removing lan tag on wan port:
 [[ ${WRT_LAN2WAN_TAG:-"null"} == 'null' ]] && /usr/bin/env sed \
@@ -437,7 +445,7 @@ echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
 if [[ ${WRT_ACME_STAR:-"null"} == 'null' ]]; then
   echo "	list domains '${WRT_HOSTNAME}.${WRT_SECRET_TLD}'" >>etc/config/acme
 else
-	/usr/bin/env cat <<EOF >>etc/config/acme
+  /usr/bin/env cat <<EOF >>etc/config/acme
 	list domains '${WRT_SECRET_TLD}'
 	list domains '*.${WRT_SECRET_TLD}'
 EOF

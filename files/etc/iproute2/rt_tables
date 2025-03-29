@@ -10,22 +10,6 @@
 # local
 #
 #1	inr.ruhep
-100 vpn_m
-101 vpn_tr
-102 vpn_cy
-103 vpn_kz
-104 vpn_ge
-105 vpn_de
-106 vpn_us
-107 vpn_ng
-108 vpn_cl
-109 vpn_bg
-110 vpn_it
-111 vpn_ar
-112 vpn_uy
-113 vpn_se
-114 vpn_nl
-115 vpn_cz
 197 prskt
 198 tproxy
 199 byp_m
