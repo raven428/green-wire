@@ -7,7 +7,10 @@ conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
 source "${conf_file}"
 : "${VER:="999"}"
+: "${WRT_HOSTNAME:="werter"}"
 : "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
+: "${DISABLED_SERVICES:="dockerd podman bird monit softflowd nfcapd tun2ray nginx \
+authelia swanctl"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
 for secret in ${secrets}; do
@@ -125,6 +128,10 @@ src/gz openwrt_routing   ${r}/packages/aarch64_cortex-a53/routing
 src/gz openwrt_packages  ${r}/packages/aarch64_cortex-a53/packages
 src/gz openwrt_telephony ${r}/packages/aarch64_cortex-a53/telephony
 EOF
+[[ ${WRT_IPSEC_PSK:-"null"} == 'null' ]] &&
+  DISABLED_SERVICES="${DISABLED_SERVICES} ipsec"
+[[ ${WRT_L2TP_PASSWD:-"null"} == 'null' ]] &&
+  DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
 /usr/bin/env docker run --user 0 --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw \
   -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
@@ -133,6 +140,7 @@ EOF
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
   make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
   EXTRA_PARTSIZE='5155' EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
+  DISABLED_SERVICES='${DISABLED_SERVICES}' \
   PACKAGES='-dnsmasq atop lsblk mmc-utils ca-certificates bsdtar ack mtr-json haproxy \
   acme-acmesh-dnsapi netatop bind-dig bind-host bind-nslookup bird2 bird2c bird2cl \
   blkid block-mount bsdiff bspatch btop cfdisk cgdisk clocate conntrack ctop iconv \

@@ -176,7 +176,7 @@ config wireguard_wgcf${r} 'wgserver${r}'
 	list allowed_ips '0.0.0.0/0'
 	list allowed_ips '::/0'
 EOF
-}
+  }
   /usr/bin/env cat <<EOF >>etc/config/network
 
 config rule 'wgcf4ru_${r}'
@@ -393,7 +393,12 @@ EOF
 done
 
 # l2tp thru ipsec
-/usr/bin/env cat <<EOF >>etc/config/network
+[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
+  ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
+  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
+  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
+  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
+  /usr/bin/env cat <<EOF >>etc/config/network
 
 config interface 'prskt'
 	option proto 'l2tp'
@@ -407,7 +412,7 @@ config interface 'prskt'
 	option auto '1'
 	option ipv6 '0'
 EOF
-/usr/bin/env cat <<EOF >etc/ipsec.conf
+  /usr/bin/env cat <<EOF >etc/ipsec.conf
 # ipsec config
 config setup
 	uniqueids=no
@@ -428,7 +433,8 @@ conn prskt
 	lifetime=9999s
 	ikelifetime=11111s
 EOF
-echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
+  echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
+}
 
 # removing lan tag on wan port:
 [[ ${WRT_LAN2WAN_TAG:-"null"} == 'null' ]] && /usr/bin/env sed \
@@ -438,7 +444,7 @@ echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
 if [[ ${WRT_ACME_STAR:-"null"} == 'null' ]]; then
   echo "	list domains '${WRT_HOSTNAME}.${WRT_SECRET_TLD}'" >>etc/config/acme
 else
-	/usr/bin/env cat <<EOF >>etc/config/acme
+  /usr/bin/env cat <<EOF >>etc/config/acme
 	list domains '${WRT_SECRET_TLD}'
 	list domains '*.${WRT_SECRET_TLD}'
 EOF
