@@ -90,6 +90,7 @@ export WRT_OTHER_ROUTES='${WRT_OTHER_ROUTES:-"tr cy kz ge de us ng cl bg it ar u
 se nl cz"}'
 export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
 dir300@00:21:91:31:98:60#99"}'
+export WRT_PORT_FORWARD='${WRT_PORT_FORWARD:-"transmission@11000-11110#114"}'
 EOF
 /usr/bin/env rm -rfv prepare/root/dot-git
 /usr/bin/env cp -r .git/modules/files/root prepare/root/dot-git
