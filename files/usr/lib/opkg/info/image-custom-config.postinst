@@ -95,6 +95,37 @@ done
 /usr/bin/env cat etc/ssl/private/main.crt \
   etc/ssl/private/main.key >etc/ssl/private/main.pem
 
+# port forwarding:
+[[ ${WRT_PORT_FORWARD:-"null"} == 'null' ]] && WRT_PORT_FORWARD=''
+# shellcheck disable=2086
+IFS=',' read -ra array <<<"$(echo -n ${WRT_PORT_FORWARD})"
+for c in "${array[@]}"; do
+  name="${c%@*}"
+  name="${name#"${name%%[![:space:]]*}"}"
+  name="${name%"${name##*[![:space:]]}"}"
+  ident="${name//[^a-zA-Z0-9_]/_}"
+  temp="${c#*@}"
+  ports="${temp%#*}"
+  ports="${ports#"${ports%%[![:space:]]*}"}"
+  ports="${ports%"${ports##*[![:space:]]}"}"
+  num="${c##*#}"
+  num="${num#"${num%%[![:space:]]*}"}"
+  num="${num%"${num##*[![:space:]]}"}"
+  echo "name: [${name}], ports: [${ports}], num: [${num}]"
+  /usr/bin/env cat <<EOF >>etc/config/firewall
+
+config redirect '${ident}'
+	option dest 'lan'
+	option target 'DNAT'
+	option name '${name}'
+	option src 'wan'
+	option src_dport '${ports}'
+	option dest_ip '${WRT_LAN3OCT}.${num}'
+	option dest_port '${ports}'
+	option family 'ipv4'
+EOF
+done
+
 # dokodemo warp:
 warp_reg='/usr/bin/warp-reg'
 /usr/bin/env curl -Lm 111 -o "${warp_reg}" \
@@ -136,6 +167,21 @@ ipv6="$(
   )"
 }
 echo "ips v4[${ipv4}] v6[${ipv6}] generated"
+  /usr/bin/env cat <<EOF >>etc/config/firewall
+
+config zone 'zone_ext'
+	option name 'ext'
+	option input 'DROP'
+	option output 'ACCEPT'
+	option forward 'DROP'
+	option masq '1'
+	option masq6 '1'
+	option mtu_fix '1'
+	list network 'tun2ray'
+	list network 'prskt'
+	list network 'wan4'
+	list network 'wan6'
+EOF
 for r in ${WRT_WARP_REGIONS}; do
   /usr/bin/env cat <<EOF >>etc/config/firewall
 	list network 'wgcf${r}'
@@ -143,6 +189,7 @@ EOF
 done
 count=0
 amount=$(echo "${WRT_WARP_REGIONS}" | /usr/bin/env tr ' ' '\n' | /usr/bin/env wc -l)
+[[ ${WRT_OTHER_ROUTES:-"null"} == 'null' ]] && WRT_OTHER_ROUTES=''
 for r in ${WRT_WARP_REGIONS} ${WRT_OTHER_ROUTES}; do
   count=$((count + 1))
   mtu='1300'
@@ -367,6 +414,7 @@ nameserver 127.0.0.1
 nameserver ::1
 EOF
 
+# dhcp clients:
 # shellcheck disable=2086
 IFS=',' read -ra array <<<"$(echo -n ${WRT_CLIENTS})"
 for c in "${array[@]}"; do
