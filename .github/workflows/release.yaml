@@ -35,6 +35,7 @@ jobs:
           repo: "green-wise"
           token: "${{ secrets.REGISTRY_WRITER }}"
           body: version ${{ github.ref_name }} of device images
+          prerelease: "${{ contains(github.ref_name, 'rc') }}"
   release:
     name: "[${{ matrix.element }}] release"
     timeout-minutes: 22
@@ -68,3 +69,4 @@ jobs:
           repo: "green-wise"
           token: "${{ secrets.REGISTRY_WRITER }}"
           body: version ${{ github.ref_name }} of device images
+          prerelease: "${{ contains(github.ref_name, 'rc') }}"
