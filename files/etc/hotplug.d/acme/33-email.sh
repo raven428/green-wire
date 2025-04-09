@@ -9,7 +9,7 @@ printf "cert [%s] done [%s] at [%s] dt" "${domains}" "${ACTION}" \
     -e 'set send_charset=utf-8' \
     -s 'новости cert подсистемы' \
     "${account_email}"
-if [[ "$ACTION" = "issued" ]]; then
+if [[ "$ACTION" == "issued" || "$ACTION" == "renewed" ]]; then
   domain="${main_domain#"${main_domain%%[![:space:]]*}"}"
   {
     /usr/bin/env ln -sfv "/etc/ssl/acme/${domain}.key" \
