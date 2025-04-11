@@ -16,14 +16,14 @@
 - build images
 
   ```bash
-  VER=025 ./build.sh
+  VER=026 ./build.sh
   ```
 
 - or make tag and send to release:
 
   ```bash
   git checkout master && git pull
-  git tag -fm $(git branch --sho) 025 && git push origin --force $(git describe)
+  git tag -fm $(git branch --sho) 026 && git push origin --force $(git describe)
   ```
 
 - flash image
