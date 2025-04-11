@@ -12,18 +12,18 @@
   green-wire && cd green-wire
   ```
 
-- set [secrets for `build.sh`](build.sh#L41-L71) in `green-wise/OpenWRT/name.sh`
+- set [secrets for `build.sh`](build.sh#L59-L93) in `green-wise/OpenWRT/name.sh`
 - build images
 
   ```bash
-  VER=024 ./build.sh
+  VER=025 ./build.sh
   ```
 
 - or make tag and send to release:
 
   ```bash
-  export VER=024 && git checkout master && git pull
-  git tag -fm master ${VER} && git push --force origin ${VER}
+  git checkout master && git pull
+  git tag -fm $(git branch --sho) 025 && git push origin --force $(git describe)
   ```
 
 - flash image

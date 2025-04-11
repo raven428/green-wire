@@ -530,7 +530,10 @@
     "growfs",
     "exfat",
     "msdos",
-    "ntfs"
+    "ntfs",
+    "noscan",
+    "nvme",
+    "pigz"
   ],
   "enabled": true
 }

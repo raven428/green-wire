@@ -7,7 +7,10 @@ conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
 source "${conf_file}"
 : "${VER:="999"}"
+: "${WRT_HOSTNAME:="werter"}"
 : "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
+: "${DISABLED_SERVICES:="dockerd podman bird monit softflowd nfcapd tun2ray nginx \
+authelia swanctl"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
 for secret in ${secrets}; do
@@ -33,6 +36,21 @@ grewi-${file_base}-${secret}" \
       echo "${current_var}" |
         /usr/bin/env tr -d '\n'
     )"
+done
+# shellcheck disable=2086
+IFS=',' read -ra array <<<"$(echo -n ${WRT_CLIENTS})"
+for c in "${array[@]}"; do
+  name="${c%@*}"
+  name="${name#"${name%%[![:space:]]*}"}"
+  name="${name%"${name##*[![:space:]]}"}"
+  temp="${c#*@}"
+  mac="${temp%#*}"
+  mac="${mac#"${mac%%[![:space:]]*}"}"
+  mac="${mac%"${mac##*[![:space:]]}"}"
+  echo "::add-mask::${name}"
+  for m in ${mac}; do
+    echo "::add-mask::${m}"
+  done
 done
 /usr/bin/env printf "\n———⟨ building [%s] image ⟩———\n" "${file_base}"
 /usr/bin/env rm -rf prepare release
@@ -66,9 +84,13 @@ export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
 export WRT_LAN2WAN_TAG='${WRT_LAN2WAN_TAG:-"null"}'
 export WRT_ACME_STAR='${WRT_ACME_STAR:-"null"}'
 export WRT_IPSEC_PSK='${WRT_IPSEC_PSK:-"s3cre1P5k4ipSek4pr0tect"}'
+export WRT_WARP_REGIONS='${WRT_WARP_REGIONS:-"m"}'
 export WRT_WARP_REG='${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}'
+export WRT_OTHER_ROUTES='${WRT_OTHER_ROUTES:-"tr cy kz ge de us ng cl bg it ar uy \
+se nl cz"}'
 export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
 dir300@00:21:91:31:98:60#99"}'
+export WRT_PORT_FORWARD='${WRT_PORT_FORWARD:-"transmission@11000-11110#114"}'
 EOF
 /usr/bin/env rm -rfv prepare/root/dot-git
 /usr/bin/env cp -r .git/modules/files/root prepare/root/dot-git
@@ -107,6 +129,13 @@ src/gz openwrt_routing   ${r}/packages/aarch64_cortex-a53/routing
 src/gz openwrt_packages  ${r}/packages/aarch64_cortex-a53/packages
 src/gz openwrt_telephony ${r}/packages/aarch64_cortex-a53/telephony
 EOF
+[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
+  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
+  DISABLED_SERVICES="${DISABLED_SERVICES} ipsec"
+[[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
+  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
+  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
+  DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
 /usr/bin/env docker run --user 0 --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw \
   -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
@@ -115,6 +144,7 @@ EOF
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
   make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
   EXTRA_PARTSIZE='5155' EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
+  DISABLED_SERVICES='${DISABLED_SERVICES}' \
   PACKAGES='-dnsmasq atop lsblk mmc-utils ca-certificates bsdtar ack mtr-json haproxy \
   acme-acmesh-dnsapi netatop bind-dig bind-host bind-nslookup bird2 bird2c bird2cl \
   blkid block-mount bsdiff bspatch btop cfdisk cgdisk clocate conntrack ctop iconv \
@@ -128,8 +158,8 @@ EOF
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
   logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
-  usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs \
-  \
+  usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
+  pigz \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
   coreutils-chown coreutils-chroot coreutils-cksum coreutils-comm coreutils-cp \
@@ -155,6 +185,7 @@ EOF
   \
   kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
   kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
+  kmod-nvme \
   \
   shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
   \
