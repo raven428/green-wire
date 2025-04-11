@@ -533,7 +533,9 @@
     "ntfs",
     "noscan",
     "nvme",
-    "pigz"
+    "pigz",
+    "hwmon",
+    "owrt"
   ],
   "enabled": true
 }
