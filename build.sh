@@ -119,7 +119,7 @@ for f in prepare/etc/dnsmasq.d/*.sets; do
   s~^(.*)$~nftset=/\1/4#inet#fw4#vpn4_${r},6#inet#fw4#vpn6_${r}~
 " -i "${f}"
 done
-/usr/bin/env mkdir -vp prepare/etc/opkg
+/usr/bin/env mkdir -vp release prepare/etc/opkg
 r="https://${WRT_OPKG_REPO}/releases/23.05.5"
 /usr/bin/env cat <<EOF >prepare/etc/opkg/distfeeds.conf
 src/gz openwrt_core      ${r}/targets/mediatek/filogic/packages
@@ -136,10 +136,10 @@ EOF
   ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
   ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
   DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
-/usr/bin/env docker run --user 0 --rm -i --network=host --name=openwrt-builder \
+/usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw \
   -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
-  ghcr.io/raven428/container-images/openwrt-imagebuilder/mediatek-filogic-23_05_5 \
+  ghcr.io/raven428/container-images/owrt-mtk-filogic-23_05_5:000 \
   /usr/bin/env bash -c " \
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
   make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
@@ -198,7 +198,7 @@ EOF
   procps-ng-sysctl procps-ng-top procps-ng-uptime procps-ng-vmstat procps-ng-w \
   procps-ng-watch \
   \
-  prometheus-node-exporter-lua prometheus-node-exporter-lua-nat_traffic \
+  prometheus-node-exporter-lua prometheus-node-exporter-lua-hwmon \
   prometheus-node-exporter-lua-netstat prometheus-node-exporter-lua-openwrt \
   prometheus-node-exporter-lua-thermal prometheus-node-exporter-lua-wifi \
   prometheus-node-exporter-lua-wifi_stations \
