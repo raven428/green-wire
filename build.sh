@@ -119,9 +119,10 @@ for f in prepare/etc/dnsmasq.d/*.sets; do
   s~^(.*)$~nftset=/\1/4#inet#fw4#vpn4_${r},6#inet#fw4#vpn6_${r}~
 " -i "${f}"
 done
-/usr/bin/env mkdir -vp prepare/etc/opkg
-r="https://${WRT_OPKG_REPO}/releases/23.05.5"
+/usr/bin/env mkdir -vp release prepare/etc/opkg
+r="https://${WRT_OPKG_REPO}/releases/24.10.1"
 /usr/bin/env cat <<EOF >prepare/etc/opkg/distfeeds.conf
+src/gz openwrt_kmods     ${r}/targets/mediatek/filogic/kmods/6.6.86-1-6ace983a14b769f576fe9c4c7961bd89
 src/gz openwrt_core      ${r}/targets/mediatek/filogic/packages
 src/gz openwrt_base      ${r}/packages/aarch64_cortex-a53/base
 src/gz openwrt_luci      ${r}/packages/aarch64_cortex-a53/luci
@@ -136,10 +137,10 @@ EOF
   ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
   ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
   DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
-/usr/bin/env docker run --user 0 --rm -i --network=host --name=openwrt-builder \
+/usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw \
   -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
-  ghcr.io/raven428/container-images/openwrt-imagebuilder/mediatek-filogic-23_05_5 \
+  ghcr.io/raven428/container-images/owrt-mtk-filogic-24_10_1:000 \
   /usr/bin/env bash -c " \
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
   make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
@@ -159,7 +160,8 @@ EOF
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
   logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
-  pigz \
+  pigz busybox \
+  \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
   coreutils-chown coreutils-chroot coreutils-cksum coreutils-comm coreutils-cp \
@@ -198,7 +200,7 @@ EOF
   procps-ng-sysctl procps-ng-top procps-ng-uptime procps-ng-vmstat procps-ng-w \
   procps-ng-watch \
   \
-  prometheus-node-exporter-lua prometheus-node-exporter-lua-nat_traffic \
+  prometheus-node-exporter-lua prometheus-node-exporter-lua-hwmon \
   prometheus-node-exporter-lua-netstat prometheus-node-exporter-lua-openwrt \
   prometheus-node-exporter-lua-thermal prometheus-node-exporter-lua-wifi \
   prometheus-node-exporter-lua-wifi_stations \
@@ -210,6 +212,10 @@ EOF
   collectd-mod-uptime collectd-mod-dns collectd-mod-ethstat collectd-mod-filecount \
   collectd-mod-fscache collectd-mod-ntpd collectd-mod-protocols collectd-mod-swap \
   collectd-mod-users collectd-mod-vmem collectd-mod-wireless collectd-mod-sensors \
+  collectd-mod-smart collectd-mod-ping collectd-mod-mqtt collectd-mod-modbus \
+  collectd-mod-lua collectd-mod-disk collectd-mod-df collectd-mod-tail collectd-mod-curl \
+  collectd-mod-threshold collectd-mod-match-value collectd-mod-match-timediff \
+  collectd-mod-match-regex collectd-mod-match-hashed collectd-mod-match-empty-counter \
   ' \
 "
 /usr/bin/env sudo chown -R "${USER}" release
@@ -247,3 +253,34 @@ ${version_number//[^0-9a-zA-Z]/_}-${version_code//[^0-9a-zA-Z]/_}"
   cd release
   /usr/bin/env tar --xz --create --file "../${dest_prefix}-etc.txz" etc
 )
+[[ "${WRT_SKIP_INSTALLER:-"none"}" == 'none' ]] && {
+  echo 'production image built, starting to build nand installer:'
+  # install by `dd if=image of=/dev/mmcblk0` doesn't work from 24.10.0 version
+  # the production image doesn't fit nand for install to eMMC from nand boot menu
+  # so, have to use minimal image for clean eMMC partition from nand then sysupgrade
+  /usr/bin/env rm -rf release/* prepare/patches/*
+  /usr/bin/env cp -v files/patches/init-d-*.diff prepare/patches
+  /usr/bin/env sed -i \
+    "s/option dest_port '80 443'/option dest_port '80 443'/" \
+    'prepare/etc/config/firewall'
+  /usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
+    -v "$(pwd)"/prepare:/files:rw \
+    -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
+    ghcr.io/raven428/container-images/owrt-mtk-filogic-24_10_1:000 \
+    /usr/bin/env bash -c " \
+    cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
+    make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
+    EXTRA_PARTSIZE='5155' EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
+    DISABLED_SERVICES='${DISABLED_SERVICES}' \
+    PACKAGES='-dnsmasq dnsmasq-full lsblk blkid mmc-utils luci bash haproxy \
+    openssh-sftp-server \
+    \
+    kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
+    kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
+    kmod-nvme \
+    \
+    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
+    ' \
+  "
+  /usr/bin/env zcat "release/${image_prefix}-sdcard.img.gz" >"${dest_prefix}-install.img"
+}
