@@ -46,6 +46,7 @@ EOF
     s/REPLACE_wifi_key_REPLACE/${WRT_WIFI_KEY}/g ;
   " \
   'etc/fail2ban/filter.d/'*.local \
+  'etc/config/luci_statistics' \
   'etc/dnsmasq.d/addrs.conf' \
   'etc/haproxy/haproxy.cfg' \
   'etc/dnsmasq.d/m.sets' \
