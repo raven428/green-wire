@@ -533,7 +533,13 @@
     "ntfs",
     "noscan",
     "nvme",
-    "pigz"
+    "pigz",
+    "hwmon",
+    "owrt",
+    "kmods",
+    "mqtt",
+    "modbus",
+    "timediff"
   ],
   "enabled": true
 }
