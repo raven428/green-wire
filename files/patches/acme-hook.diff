@@ -4,26 +4,26 @@
 
      (umask 077; cat "$domain_dir/fullchain.cer" "$domain_dir/$main_domain.key" > "$domain_dir/combined.cer")
 
--    if [ ! -e "$CERT_DIR/$main_domain.crt" ]; then
+-	if [ ! -e "$CERT_DIR/$main_domain.crt" ]; then
 -		ln -s "$domain_dir/$main_domain.cer" "$CERT_DIR/$main_domain.crt"
--    fi
--    if [ ! -e "$CERT_DIR/$main_domain.key" ]; then
+-	fi
+-	if [ ! -e "$CERT_DIR/$main_domain.key" ]; then
 -		ln -s "$domain_dir/$main_domain.key" "$CERT_DIR/$main_domain.key"
--    fi
--    if [ ! -e "$CERT_DIR/$main_domain.fullchain.crt" ]; then
+-	fi
+-	if [ ! -e "$CERT_DIR/$main_domain.fullchain.crt" ]; then
 -		ln -s "$domain_dir/fullchain.cer" "$CERT_DIR/$main_domain.fullchain.crt"
--    fi
--    if [ ! -e "$CERT_DIR/$main_domain.combined.crt" ]; then
+-	fi
+-	if [ ! -e "$CERT_DIR/$main_domain.combined.crt" ]; then
 -		ln -s "$domain_dir/combined.cer" "$CERT_DIR/$main_domain.combined.crt"
--    fi
--    if [ ! -e "$CERT_DIR/$main_domain.chain.crt" ]; then
+-	fi
+-	if [ ! -e "$CERT_DIR/$main_domain.chain.crt" ]; then
 -		ln -s "$domain_dir/ca.cer" "$CERT_DIR/$main_domain.chain.crt"
--    fi
-+    ln -sf "$domain_dir/$main_domain.cer" "$CERT_DIR/$main_domain.crt"
-+    ln -sf "$domain_dir/$main_domain.key" "$CERT_DIR/$main_domain.key"
-+    ln -sf "$domain_dir/fullchain.cer" "$CERT_DIR/$main_domain.fullchain.crt"
-+    ln -sf "$domain_dir/combined.cer" "$CERT_DIR/$main_domain.combined.crt"
-+    ln -sf "$domain_dir/ca.cer" "$CERT_DIR/$main_domain.chain.crt"
+-	fi
++	ln -sf "$domain_dir/$main_domain.cer" "$CERT_DIR/$main_domain.crt"
++	ln -sf "$domain_dir/$main_domain.key" "$CERT_DIR/$main_domain.key"
++	ln -sf "$domain_dir/fullchain.cer" "$CERT_DIR/$main_domain.fullchain.crt"
++	ln -sf "$domain_dir/combined.cer" "$CERT_DIR/$main_domain.combined.crt"
++	ln -sf "$domain_dir/ca.cer" "$CERT_DIR/$main_domain.chain.crt"
  }
 
  case $1 in

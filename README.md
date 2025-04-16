@@ -16,24 +16,28 @@
 - build images
 
   ```bash
-  VER=025 ./build.sh
+  VER=026 ./build.sh
   ```
 
 - or make tag and send to release:
 
   ```bash
   git checkout master && git pull
-  git tag -fm $(git branch --sho) 025 && git push origin --force $(git describe)
+  git tag -fm $(git branch --sho) 026 && git push origin --force $(git describe)
   ```
 
-- flash image
+## Clean eMMC install steps
 
-  ```bash
-  # either eMMC:
-  dd if=upload/bpi_r3-rel${VER}-name-*-image.img of=/dev/mmcblk0
+- flash sdcard image `dd if=bpi_r3-rel${VER}-name-*-install.img of=/dev/sda`
 
-  # or sdcard:
-  dd if=upload/bpi_r3-rel${VER}-name-*-image.img of=/dev/sda
-  ```
+- boot from sdcard with H-H-H-H switchers
 
-  Also, `upload/bpi_r3-rel${VER}-name-*-sysupgrade.itb` could be installed through sysupgrade. However, no re-partition will be performed in this case
+- install to NAND from the boot menu
+
+- boot from NAND with H-L-H-L switchers
+
+- install to eMMC from the boot menu
+
+- boot from eMMC with L-H-H-L switchers
+
+- perform `sysupgrade` with `bpi_r3-rel${VER}-name-*-sysupgrade.itb`
