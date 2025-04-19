@@ -12,18 +12,18 @@
   green-wire && cd green-wire
   ```
 
-- set [secrets for `build.sh`](build.sh#L59-L93) in `green-wise/OpenWRT/name.sh`
+- set [secrets for `build.sh`](build.sh#L60-L105) in `green-wise/OpenWRT/name.sh`
 - build images
 
   ```bash
-  VER=026 ./build.sh
+  VER=027 ./build.sh
   ```
 
 - or make tag and send to release:
 
   ```bash
   git checkout master && git pull
-  git tag -fm $(git branch --sho) 026 && git push origin --force $(git describe)
+  git tag -fm $(git branch --sho) 027 && git push origin --force $(git describe)
   ```
 
 ## Clean eMMC install steps
