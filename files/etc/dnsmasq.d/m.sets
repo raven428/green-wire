@@ -37,6 +37,7 @@ archive.org
 appstorrent.ru
 habr.ru
 habr.com
+habrastorage.org
 flibusta.is
 flibusta.net
 flibusta.lib
@@ -118,6 +119,13 @@ logic-case.com
 expedia.com
 getoutline.com
 cacti.net
+cloudflare-ech.com
+languagetool.org
+languagetool.com
+languagetoolplus.com
+flightconnections.com
+cloudfree.shop
+rocketcdn.me
 
 # torrent
 lostfilm.tv
@@ -945,3 +953,19 @@ tmdb-image-prod.b-cdn.net
 # speedcheck.org
 etrality.com
 speedcheck.org
+
+# roon
+roon.app
+roonlabs.com
+roonlabs.net
+
+# qobuz
+qobuz.com
+ws-eu.pusher.com
+qobuz-qobuz-prod.web.arc-cdn.net
+streaming-qobuz-std.akamaized.net
+
+# tidal
+tidal.com
+tidalhifi.com
+wimpmusic.com
