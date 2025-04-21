@@ -22,6 +22,14 @@ rm -fv "etc/secrets.sh"
 59 23 * * * /etc/init.d/atop restart
 EOF
 
+# move distinct configs if exists:
+[[ "${WRT_CO_SUFFIX}" = 'none' ]] || {
+  for config in 'etc/config/wireless' 'etc/config/network'; do
+    [[ -e "${config}-${WRT_CO_SUFFIX}" ]] &&
+      /usr/bin/env mv -vf "${config}-${WRT_CO_SUFFIX}" "${config}"
+  done
+}
+
 # replace placeholders:
 /usr/bin/env sed -i \
   "
@@ -87,7 +95,7 @@ chmod +x "$1/000-printenv.sh"
 /usr/bin/env ln -vsf /root/.msmtp.queue .msmtp.queue
 /usr/bin/env ln -vsf /usr/bin/msmtpq usr/sbin/sendmail
 /usr/bin/env ln -vsf /dev/null sent
-/usr/bin/env ln -vsf /dev/null /root/sent
+/usr/bin/env ln -vsf /dev/null root/sent
 
 # patches:
 for f in patches/*.diff; do
@@ -519,4 +527,4 @@ echo "OPENWRT_GREWIBU='${WRT_GREWIBU}'" >>etc/os-release
   etc/banner
 
 # copy for observation
-/usr/bin/env cp -r etc /builder/bin/targets/mediatek/filogic
+/usr/bin/env cp -r etc "/builder/bin/targets/${WRT_BOARD}"
