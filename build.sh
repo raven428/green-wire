@@ -5,6 +5,8 @@ set -ueo pipefail
 file_base=${NAME2BUILD:-"werter"}
 conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
+source "configs/${file_base}.sh"
+# shellcheck source=/dev/null
 source "${conf_file}"
 : "${VER:="999"}"
 : "${WRT_HOSTNAME:="werter"}"
@@ -55,8 +57,18 @@ done
 /usr/bin/env printf "\n———⟨ building [%s] image ⟩———\n" "${file_base}"
 /usr/bin/env rm -rf prepare release
 /usr/bin/env cp -r files prepare
+export WRT_ARCH="${WRT_ARCH:-"aarch64_cortex-a53"}"
+export WRT_BOARD="${WRT_BOARD:-"mediatek/filogic"}"
+export WRT_KMODS="${WRT_KMODS:-"6.6.86-1-6ace983a14b769f576fe9c4c7961bd89"}"
+export WRT_BUILDER="${WRT_BUILDER:-"ghcr.io/raven428/container-images/\
+owrt-mtk-filogic-24_10_1:000"}"
+# WRT_ADD_PKGS="${WRT_ADD_PKGS:-""}"
+# WRT_SIZE_ROOT="${WRT_SIZE_ROOT:-"2222"}"
+# WRT_SIZE_EXTRA="${WRT_SIZE_EXTRA:-"5155"}"
 /usr/bin/env cat <<EOF >prepare/etc/secrets.sh
 export WRT_GREWIBU='${VER}'
+export WRT_BOARD='${WRT_BOARD:-"mediatek/filogic"}'
+export WRT_CO_SUFFIX='${WRT_CO_SUFFIX:-"none"}'
 export WRT_ROOT_PASSWD='${WRT_DEF_PASSWD:-"luc1-r00t+pa5Swd"}'
 export WRT_LUCI_CGI='${WRT_LUCI_CGI:-"cgi-bin"}'
 export WRT_LUCI_STA='${WRT_LUCI_STA:-"luci-static"}'
@@ -122,13 +134,13 @@ done
 /usr/bin/env mkdir -vp release prepare/etc/opkg
 r="https://${WRT_OPKG_REPO}/releases/24.10.1"
 /usr/bin/env cat <<EOF >prepare/etc/opkg/distfeeds.conf
-src/gz openwrt_kmods     ${r}/targets/mediatek/filogic/kmods/6.6.86-1-6ace983a14b769f576fe9c4c7961bd89
-src/gz openwrt_core      ${r}/targets/mediatek/filogic/packages
-src/gz openwrt_base      ${r}/packages/aarch64_cortex-a53/base
-src/gz openwrt_luci      ${r}/packages/aarch64_cortex-a53/luci
-src/gz openwrt_routing   ${r}/packages/aarch64_cortex-a53/routing
-src/gz openwrt_packages  ${r}/packages/aarch64_cortex-a53/packages
-src/gz openwrt_telephony ${r}/packages/aarch64_cortex-a53/telephony
+src/gz openwrt_kmods     ${r}/targets/${WRT_BOARD}/kmods/${WRT_KMODS}
+src/gz openwrt_core      ${r}/targets/${WRT_BOARD}/packages
+src/gz openwrt_base      ${r}/packages/${WRT_ARCH}/base
+src/gz openwrt_luci      ${r}/packages/${WRT_ARCH}/luci
+src/gz openwrt_routing   ${r}/packages/${WRT_ARCH}/routing
+src/gz openwrt_packages  ${r}/packages/${WRT_ARCH}/packages
+src/gz openwrt_telephony ${r}/packages/${WRT_ARCH}/telephony
 EOF
 [[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
   ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
@@ -138,14 +150,14 @@ EOF
   ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
   DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
 /usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
-  -v "$(pwd)"/prepare:/files:rw \
-  -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
-  ghcr.io/raven428/container-images/owrt-mtk-filogic-24_10_1:000 \
-  /usr/bin/env bash -c " \
+  -v "$(pwd)"/prepare:/files:rw -u 0 \
+  -v "$(pwd)/release:/builder/bin/targets/${WRT_BOARD}:rw" \
+  "${WRT_BUILDER}" /usr/bin/env bash -c "\
   cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
-  make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
-  EXTRA_PARTSIZE='5155' EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
-  DISABLED_SERVICES='${DISABLED_SERVICES}' \
+  make image PROFILE='${WRT_PROFILE}' FILES='/files' \
+  ${WRT_SIZE_ROOT:+ROOTFS_PARTSIZE=${WRT_SIZE_ROOT}} \
+  ${WRT_SIZE_EXTRA:+EXTRA_PARTSIZE=${WRT_SIZE_EXTRA}} \
+  EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' DISABLED_SERVICES='${DISABLED_SERVICES}' \
   PACKAGES='-dnsmasq atop lsblk mmc-utils ca-certificates bsdtar ack mtr-json haproxy \
   acme-acmesh-dnsapi netatop bind-dig bind-host bind-nslookup bird2 bird2c bird2cl \
   blkid block-mount bsdiff bspatch btop cfdisk cgdisk clocate conntrack ctop iconv \
@@ -154,13 +166,13 @@ EOF
   flock fping gawk gdisk git grep hping3 htop iftop iperf iperf3 iputils-arping bwm-ng \
   iputils-clockdiff iputils-ping iputils-tracepath jool-tools-netfilter jq less libgcc \
   libustream-mbedtls lm-sensors logger losetup monit moreutils msmtp msmtp-queue bmon \
-  mutt nand-utils netcat nfdump nftables openssh-sftp-server openssl-util parted patch \
+  mutt netcat nfdump nftables openssh-sftp-server openssl-util parted patch \
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
   logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
-  pigz busybox \
+  pigz busybox gzip ${WRT_ADD_PKGS:-} \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
@@ -187,7 +199,6 @@ EOF
   \
   kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
   kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
-  kmod-nvme \
   \
   shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
   \
@@ -246,9 +257,18 @@ version_number="$(/usr/bin/env jq -r '.version_number' release/profiles.json)"
 /usr/bin/env mkdir -vp "upload"
 dest_prefix="upload/${device_id//[^0-9a-zA-Z]/_}-rel${VER}-${file_base}-\
 ${version_number//[^0-9a-zA-Z]/_}-${version_code//[^0-9a-zA-Z]/_}"
-/usr/bin/env cp -vf "release/${image_prefix}-squashfs-sysupgrade.itb" \
-  "${dest_prefix}-sysupgrade.itb"
-/usr/bin/env zcat "release/${image_prefix}-sdcard.img.gz" >"${dest_prefix}-image.img"
+src="release/${image_prefix}-squashfs-sysupgrade.itb"
+[[ -e "${src}" ]] && /usr/bin/env cp -vf "${src}" "${dest_prefix}-sysupgrade.itb"
+src="release/${image_prefix}-sdcard.img.gz"
+[[ -e "${src}" ]] && /usr/bin/env zcat "${src}" >"${dest_prefix}-image.img"
+src="release/${image_prefix}-squashfs-sdcard.img.gz"
+[[ -e "${src}" ]] && /usr/bin/env cp -vf "${src}" "${dest_prefix}-squashfs.img.gz"
+src="release/${image_prefix}-ext4-sdcard.img.gz"
+[[ -e "${src}" ]] && /usr/bin/env cp -vf "${src}" "${dest_prefix}-ext4.img.gz"
+src="release/${image_prefix}-squashfs-sysupgrade.img.gz"
+[[ -e "${src}" ]] && /usr/bin/env cp -vf "${src}" "${dest_prefix}-squashfs.img.gz"
+src="release/${image_prefix}-ext4-sysupgrade.img.gz"
+[[ -e "${src}" ]] && /usr/bin/env cp -vf "${src}" "${dest_prefix}-ext4.img.gz"
 (
   cd release
   /usr/bin/env tar --xz --create --file "../${dest_prefix}-etc.txz" etc
@@ -263,24 +283,25 @@ ${version_number//[^0-9a-zA-Z]/_}-${version_code//[^0-9a-zA-Z]/_}"
   /usr/bin/env sed -i \
     "s/option dest_port '80 443'/option dest_port '80 443'/" \
     'prepare/etc/config/firewall'
-  /usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
+  /usr/bin/env podman run -u 0 --rm -i --network=host --name=openwrt-builder \
     -v "$(pwd)"/prepare:/files:rw \
-    -v "$(pwd)"/release:/builder/bin/targets/mediatek/filogic:rw \
+    -v "$(pwd)/release:/builder/bin/targets/${WRT_BOARD}:rw" \
     ghcr.io/raven428/container-images/owrt-mtk-filogic-24_10_1:000 \
     /usr/bin/env bash -c " \
     cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
-    make image PROFILE='bananapi_bpi-r3' FILES='/files' ROOTFS_PARTSIZE='2222' \
-    EXTRA_PARTSIZE='5155' EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
+    make image PROFILE='${WRT_PROFILE}' FILES='/files' \
+    ${WRT_SIZE_ROOT:+ROOTFS_PARTSIZE=${WRT_SIZE_ROOT}} \
+    ${WRT_SIZE_EXTRA:+EXTRA_PARTSIZE=${WRT_SIZE_EXTRA}} \
+    EXTRA_IMAGE_NAME='rel${VER}-${WRT_HOSTNAME}' \
     DISABLED_SERVICES='${DISABLED_SERVICES}' \
-    PACKAGES='-dnsmasq dnsmasq-full lsblk blkid mmc-utils luci bash haproxy \
-    openssh-sftp-server \
+    PACKAGES='lsblk blkid mmc-utils luci bash haproxy openssh-sftp-server \
     \
     kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
     kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
-    kmod-nvme \
     \
-    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
+    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod ${WRT_ADD_PKGS} \
     ' \
   "
   /usr/bin/env zcat "release/${image_prefix}-sdcard.img.gz" >"${dest_prefix}-install.img"
 }
+exit 0

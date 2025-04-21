@@ -38,7 +38,7 @@ uci_record="$(/usr/bin/env uci add fstab mount)"
 /usr/bin/env block mount
 if [[ ${move_home} == 1 ]]; then
   /usr/bin/env rm -rfv /extra/home 2>&1 | tee /dev/kmsg
-  /usr/bin/env mkdir -vp /extra/home 2>&1 | tee /dev/kmsg
+  /usr/bin/env mkdir -vp /extra/{home,opt} 2>&1 | tee /dev/kmsg
   /usr/bin/env mv -vf /root /extra/home 2>&1 | tee /dev/kmsg
   /usr/bin/env mv -vf /extra/home/root/dot-git \
     /extra/home/root/.git 2>&1 | tee /dev/kmsg
