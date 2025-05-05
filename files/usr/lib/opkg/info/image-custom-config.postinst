@@ -425,6 +425,7 @@ nameserver ::1
 EOF
 
 # dhcp clients:
+mac_list=''
 # shellcheck disable=2086
 IFS=',' read -ra array <<<"$(echo -n ${WRT_CLIENTS})"
 for c in "${array[@]}"; do
@@ -436,6 +437,9 @@ for c in "${array[@]}"; do
   mac="${temp%#*}"
   mac="${mac#"${mac%%[![:space:]]*}"}"
   mac="${mac%"${mac##*[![:space:]]}"}"
+  for m in ${mac}; do
+    mac_list="${mac_list} ${m}"
+	done
   num="${c##*#}"
   num="${num#"${num%%[![:space:]]*}"}"
   num="${num%"${num##*[![:space:]]}"}"
@@ -451,6 +455,18 @@ config host '${ident}'
 	option leasetime 'infinite'
 EOF
 done
+
+# fill mac list:
+mac_filter=''
+[[ "${WRT_WIFI_MAC_FILTER:-"null"}" = 'allow' ]] && {
+  mac_filter="\toption macfilter 'allow'"
+  for m in ${mac_list} ${WRT_WIFI_MAC_ADD:-}; do
+    mac_filter="${mac_filter}\n\tlist maclist '${m}'"
+	done
+  mac_filter="${mac_filter}\n"
+}
+/usr/bin/env sed -i "s/REPLACE_mac_filter_REPLACE/${mac_filter}/g ;" \
+  'etc/config/wireless'
 
 # l2tp thru ipsec
 [[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&

@@ -13,7 +13,7 @@ config wifi-iface 'default_radio0'
 	option ssid 'REPLACE_wifi_ssid_REPLACE2'
 	option encryption 'sae-mixed'
 	option key 'REPLACE_wifi_key_REPLACE'
-
+REPLACE_mac_filter_REPLACE
 config wifi-device 'radio1'
 	option type 'mac80211'
 	option path 'platform/soc/18000000.wifi+1'
@@ -31,3 +31,4 @@ config wifi-iface 'default_radio1'
 	option ssid 'REPLACE_wifi_ssid_REPLACE5'
 	option encryption 'sae-mixed'
 	option key 'REPLACE_wifi_key_REPLACE'
+REPLACE_mac_filter_REPLACE
