@@ -539,7 +539,18 @@
     "kmods",
     "mqtt",
     "modbus",
-    "timediff"
+    "timediff",
+    "rockchip",
+    "armv",
+    "friendlyarm",
+    "nanopi",
+    "sunxi",
+    "cortexa",
+    "xunlong",
+    "orangepi",
+    "wpad",
+    "macfilter",
+    "maclist"
   ],
   "enabled": true
 }

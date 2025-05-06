@@ -1,0 +1,52 @@
+
+config interface 'loopback'
+	option device 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option ula_prefix 'fddc:1df3:7d2a:2::/64'
+
+config device 'br_lan'
+	option name 'br-lan'
+	option type 'bridge'
+	option macaddr 'REPLACE_device_mac_REPLACE'
+	list ports 'eth0'
+	list ports 'eth1'
+
+config bridge-vlan 'lan77'
+	option device 'br-lan'
+	option vlan '77'
+	list ports 'eth1'
+
+config interface 'lan'
+	option device 'br-lan.77'
+	option proto 'static'
+	option ipaddr '192.168.69.222'
+	option netmask '255.255.255.0'
+	option ip6assign '60'
+
+config device 'eth0'
+	option name 'eth0'
+	option macaddr 'REPLACE_device_mac_REPLACE'
+
+config device 'eth1'
+	option name 'eth1'
+	option macaddr 'REPLACE_device_mac_REPLACE'
+
+config interface 'wan4'
+	option device 'br-lan.5'
+	option proto 'dhcp'
+	option peerdns '0'
+
+config interface 'wan6'
+	option device 'br-lan.5'
+	option proto 'dhcpv6'
+	option peerdns '0'
+
+config bridge-vlan 'wan5'
+	option device 'br-lan'
+	option vlan '5'
+	list ports 'eth0'
+	list ports 'eth1:t' # lan tag on wan port

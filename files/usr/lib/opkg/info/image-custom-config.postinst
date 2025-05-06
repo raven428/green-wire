@@ -22,6 +22,14 @@ rm -fv "etc/secrets.sh"
 59 23 * * * /etc/init.d/atop restart
 EOF
 
+# move distinct configs if exists:
+[[ "${WRT_CO_SUFFIX}" = 'none' ]] || {
+  for config in 'etc/config/wireless' 'etc/config/network'; do
+    [[ -e "${config}-${WRT_CO_SUFFIX}" ]] &&
+      /usr/bin/env mv -vf "${config}-${WRT_CO_SUFFIX}" "${config}"
+  done
+}
+
 # replace placeholders:
 /usr/bin/env sed -i \
   "
@@ -87,7 +95,7 @@ chmod +x "$1/000-printenv.sh"
 /usr/bin/env ln -vsf /root/.msmtp.queue .msmtp.queue
 /usr/bin/env ln -vsf /usr/bin/msmtpq usr/sbin/sendmail
 /usr/bin/env ln -vsf /dev/null sent
-/usr/bin/env ln -vsf /dev/null /root/sent
+/usr/bin/env ln -vsf /dev/null root/sent
 
 # patches:
 for f in patches/*.diff; do
@@ -417,6 +425,7 @@ nameserver ::1
 EOF
 
 # dhcp clients:
+mac_list=''
 # shellcheck disable=2086
 IFS=',' read -ra array <<<"$(echo -n ${WRT_CLIENTS})"
 for c in "${array[@]}"; do
@@ -428,6 +437,9 @@ for c in "${array[@]}"; do
   mac="${temp%#*}"
   mac="${mac#"${mac%%[![:space:]]*}"}"
   mac="${mac%"${mac##*[![:space:]]}"}"
+  for m in ${mac}; do
+    mac_list="${mac_list} ${m}"
+	done
   num="${c##*#}"
   num="${num#"${num%%[![:space:]]*}"}"
   num="${num%"${num##*[![:space:]]}"}"
@@ -443,6 +455,18 @@ config host '${ident}'
 	option leasetime 'infinite'
 EOF
 done
+
+# fill mac list:
+mac_filter=''
+[[ "${WRT_WIFI_MAC_FILTER:-"null"}" = 'allow' ]] && {
+  mac_filter="\toption macfilter 'allow'"
+  for m in ${mac_list} ${WRT_WIFI_MAC_ADD:-}; do
+    mac_filter="${mac_filter}\n\tlist maclist '${m}'"
+	done
+  mac_filter="${mac_filter}\n"
+}
+/usr/bin/env sed -i "s/REPLACE_mac_filter_REPLACE/${mac_filter}/g ;" \
+  'etc/config/wireless'
 
 # l2tp thru ipsec
 [[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
@@ -519,4 +543,4 @@ echo "OPENWRT_GREWIBU='${WRT_GREWIBU}'" >>etc/os-release
   etc/banner
 
 # copy for observation
-/usr/bin/env cp -r etc /builder/bin/targets/mediatek/filogic
+/usr/bin/env cp -r etc "/builder/bin/targets/${WRT_BOARD}"
