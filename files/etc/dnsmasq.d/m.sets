@@ -30,11 +30,11 @@ meduza.io
 zona.media
 medium.com
 medium.systems
+lidarr.audio
 radarr.video
 servarr.com
 surfshark.com
 archive.org
-appstorrent.ru
 habr.ru
 habr.com
 habrastorage.org
@@ -70,6 +70,7 @@ vps2day.com
 servinga.com
 4pda.ru
 4pda.to
+4pda.ws
 ua
 lt
 lv
@@ -127,6 +128,11 @@ flightconnections.com
 cloudfree.shop
 rocketcdn.me
 sprut.ai
+scandinavianoutdoor.ru
+scandinavianoutdoor.com
+magticom.ge
+last.fm
+lastfm.freetls.fastly.net
 
 # torrent
 lostfilm.tv
@@ -179,12 +185,17 @@ teamhd.org
 tormac.org
 uniongang.net
 newstudio.tv
+appstorrent.ru
 torrent.by
 file-tracker.net
 torrents-local.xyz
 filbi1976.org
 free-torrents.org
 seedoff.net
+sound-park.world
+losslessclub.com
+toptracker.ru
+sound-park.world
 
 # https://github.com/blackmatrix7/ios_rule_script and
 # https://github.com/v2fly/domain-list-community bellow
