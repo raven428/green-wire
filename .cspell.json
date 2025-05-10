@@ -1,6 +1,6 @@
 {
   "version": "0.2",
-  "language": "en",
+  "language": "en,ru",
   "words": [
     "abns",
     "acmesh",
@@ -354,6 +354,7 @@
     "postrouting",
     "pppdn",
     "pppup",
+    "pppdown",
     "prealloc",
     "preconfigured",
     "prefered",
@@ -550,7 +551,19 @@
     "orangepi",
     "wpad",
     "macfilter",
-    "maclist"
+    "maclist",
+    "pstore",
+    "bootmenu",
+    "iptraf",
+    "nload",
+    "oifname",
+    "elif",
+    "pjreo",
+    "farmlend",
+    "НСДИ",
+    "xhci",
+    "txpower",
+    "qtype"
   ],
   "enabled": true
 }

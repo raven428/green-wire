@@ -20,6 +20,7 @@ max_line_length = 222
 
 [files/usr/lib/opkg/info/image-custom-config.postinst]
 indent_style = ''
+max_line_length = 222
 
 [files/etc/{dnsmasq.d/addrs.conf,config/uhttpd,fail2ban/**}]
 max_line_length = 222
