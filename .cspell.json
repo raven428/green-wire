@@ -550,7 +550,9 @@
     "orangepi",
     "wpad",
     "macfilter",
-    "maclist"
+    "maclist",
+    "pstore",
+    "bootmenu"
   ],
   "enabled": true
 }
