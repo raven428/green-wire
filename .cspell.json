@@ -1,6 +1,6 @@
 {
   "version": "0.2",
-  "language": "en",
+  "language": "en,ru",
   "words": [
     "abns",
     "acmesh",
@@ -550,7 +550,16 @@
     "orangepi",
     "wpad",
     "macfilter",
-    "maclist"
+    "maclist",
+    "pstore",
+    "bootmenu",
+    "iptraf",
+    "nload",
+    "oifname",
+    "elif",
+    "pjreo",
+    "farmlend",
+    "НСДИ"
   ],
   "enabled": true
 }
