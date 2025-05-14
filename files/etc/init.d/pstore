@@ -1,0 +1,31 @@
+#!/bin/sh /etc/rc.common
+# shellcheck disable=2034
+START=95
+USE_PROCD=1
+PSTORE='/sys/fs/pstore'
+
+start_service() {
+  set -ue
+  pstore_files=''
+  for f in "${PSTORE}"/*; do
+    /usr/bin/env test -e "${f}" && {
+      pstore_files="${pstore_files} -a ${f}"
+      echo "found [${f}] kernel crash report" | /usr/bin/env logger -t 'pstore'
+    }
+  done
+  /usr/bin/env test "${pstore_files}" != '' && {
+    # shellcheck disable=2086,3028
+    /usr/bin/env printf \
+      'Kerned used to panic and reported\n\n pfa\n\n' |
+      /usr/bin/env mutt \
+        -e 'set envelope_from=yes' \
+        -e "set from=pstore@${HOSTNAME}.localdomain" \
+        -e 'set realname="pstore dumper"' \
+        -e 'set send_charset=utf-8' \
+        -s 'penguin complaints' \
+        ${pstore_files} -- \
+        'raven428@gmail.com' &&
+      rm -vf "${PSTORE:?}"/* 2>&1 | /usr/bin/env logger -t 'pstore'
+  }
+  echo "kernel crash reports check finished" | /usr/bin/env logger -t 'pstore'
+}
