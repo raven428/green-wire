@@ -1,0 +1,57 @@
+#!/bin/sh /etc/rc.common
+# shellcheck disable=2034
+STOP=10
+START=95
+USE_PROCD=1
+CHAIN='wifi-post'
+TABLE='bridge-shaper'
+PPS_2G='2222'
+PPS_5G='5555'
+BURST='1000'
+
+start_service() {
+  modprobe nft_queue nft_meta_bridge
+  nft "list table bridge ${TABLE}" >/dev/null 2>&1 || nft "add table bridge ${TABLE}"
+  nft "list chain bridge ${TABLE} ${CHAIN}" >/dev/null 2>&1 ||
+    nft "add chain bridge ${TABLE} ${CHAIN} { \
+    type filter hook postrouting priority 0; policy accept; \
+  }"
+  nft "flush table bridge ${TABLE}"
+  # shellcheck disable=2016
+  INTERFACES=$(
+    /usr/bin/env ip link |
+      /usr/bin/env grep -E 'phy[0-1]-ap0' |
+      /usr/bin/env awk -F': ' '{print $2}' |
+      /usr/bin/env cut -d'@' -f1
+  )
+  for IFACE in ${INTERFACES}; do
+    # shellcheck disable=2016
+    FREQ=$(
+      /usr/bin/env iw dev "${IFACE}" info 2>/dev/null |
+        /usr/bin/env grep channel |
+        /usr/bin/env awk '{print $3}' | tr -d '()'
+    )
+    if [ -n "${FREQ}" ]; then
+      if [ "${FREQ}" -ge 2412 ] && [ "${FREQ}" -le 2472 ]; then
+        PPS_LIMIT=${PPS_2G}
+      elif [ "${FREQ}" -ge 5180 ] && [ "${FREQ}" -le 5825 ]; then
+        PPS_LIMIT=${PPS_5G}
+      else
+        PPS_LIMIT=${PPS_2G}
+      fi
+      nft "add rule bridge \
+        ${TABLE} ${CHAIN} \
+        oifname ${IFACE} \
+        limit rate ${PPS_LIMIT}/second burst ${BURST} packets \
+        counter accept"
+      nft "add rule bridge \
+        ${TABLE} ${CHAIN} \
+        oifname ${IFACE} \
+        counter queue"
+    fi
+  done
+}
+
+stop_service() {
+  nft "list table bridge ${TABLE}" >/dev/null 2>&1 && nft "delete table bridge ${TABLE}"
+}
