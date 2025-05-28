@@ -1,0 +1,31 @@
+#!/bin/sh /etc/rc.common
+# shellcheck disable=2034
+STOP=10
+START=95
+USE_PROCD=1
+CHAIN='wifi-post'
+TABLE='bridge-shaper'
+INTERFACES='phy*'
+PPS_LIMIT='1111'
+BURST='100'
+
+start_service() {
+  nft "list table bridge ${TABLE}" >/dev/null 2>&1 || nft "add table bridge ${TABLE}"
+  nft "list chain bridge ${TABLE} ${CHAIN}" >/dev/null 2>&1 ||
+    nft "add chain bridge ${TABLE} ${CHAIN} { \
+    type filter hook postrouting priority 0; policy accept; \
+  }"
+  nft "add rule bridge \
+    ${TABLE} ${CHAIN} \
+    oifname { ${INTERFACES} } \
+    limit rate ${PPS_LIMIT}/second burst ${BURST} packets \
+    counter accept"
+  nft "add rule bridge \
+    ${TABLE} ${CHAIN} \
+    oifname { ${INTERFACES} } \
+    counter queue"
+}
+
+stop_service() {
+  nft "list table bridge ${TABLE}" >/dev/null 2>&1 && nft "delete table bridge ${TABLE}"
+}
