@@ -173,7 +173,7 @@ EOF
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
   logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
-  pigz busybox gzip ${WRT_ADD_PKGS:-} \
+  pigz busybox gzip iptraf-ng nload ${WRT_ADD_PKGS//$'\n'/ } \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
   coreutils-basenc coreutils-cat coreutils-chcon coreutils-chgrp coreutils-chmod \
@@ -200,6 +200,7 @@ EOF
   \
   kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
   kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
+  kmod-nft-bridge kmod-nft-queue \
   \
   shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod \
   \
