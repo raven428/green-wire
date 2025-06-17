@@ -294,13 +294,15 @@ config rule 'mark6_lan_${r}'
 	option target 'MARK'
 	list proto 'all'
 
-config rule 'mark4_int_${r}'
-	option name 'mark4_int_${r}'
-	option dest 'ext'
-	option ipset 'vpn4_${r}'
-	option set_mark '0x1${mark}'
-	option target 'MARK'
-	list proto 'all'
+# rule disabled due detouring the whole cloudflare in vpn4_m.txt
+# to keep router available for cloudflare proxy incoming requests
+# config rule 'mark4_int_${r}'
+# 	option name 'mark4_int_${r}'
+# 	option dest 'ext'
+# 	option ipset 'vpn4_${r}'
+# 	option set_mark '0x1${mark}'
+# 	option target 'MARK'
+# 	list proto 'all'
 
 config rule 'mark6_int_${r}'
 	option name 'mark6_int_${r}'
