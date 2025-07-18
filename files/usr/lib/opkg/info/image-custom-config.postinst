@@ -20,6 +20,7 @@ rm -fv "etc/secrets.sh"
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
 59 23 * * * /etc/init.d/atop restart
+0 * * * * /usr/bin/find /extra/opt/var/lib/collectd/rrd -mindepth 3 -maxdepth 3 -type f -name 'dns_qtype-#*.rrd' -delete -print
 EOF
 
 # move distinct configs if exists:
