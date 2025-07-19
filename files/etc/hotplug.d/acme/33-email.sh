@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # shellcheck disable=2154
-printf "cert [%s] done [%s] at [%s] dt" "${domains}" "${ACTION}" \
-  "$(date '+%Y%m%dT%H%M%S')" |
+/usr/bin/env printf 'Hello,\n
+There are cert action [%s] performed [%s] at [%s] date/time\n
+-- \nYour [%s] sincerely. Have a good time!\n' "${domains}" "${ACTION}" \
+  "$(/usr/bin/env date '+%Y%m%dT%H%M%S.%3N')" \
+  "${HOSTNAME}" |
   /usr/bin/env mutt \
     -e 'set envelope_from=yes' \
     -e "set from=acme@${HOSTNAME}.localdomain" \

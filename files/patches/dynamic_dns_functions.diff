@@ -5,13 +5,13 @@
  			__MSG=" $__TIME  note : $__MSG" ;;
  		6)	__CMD="logger -p user.info -t ddns-scripts[$$] $SECTION_ID: $__MSG"
 +			echo $__MSG | grep -i rerun >/dev/null 2>/dev/null ||
-+			echo "$__MSG" |
++			/usr/bin/env printf 'Привет!\n\nСейчас [%s] времени, а у роботов появились новости в DDNS подсистеме. Вот они:\n\n=== кусь начался ===\n%s\n=== кусь закончился ===\n\n-- \nИскренне ваш [%s] роутер. Удачи!\n' "$(/usr/bin/env date '+%Y%m%dT%H%M%S.%3N')" "${__MSG}" "${HOSTNAME}" |
 +			/usr/bin/env mutt \
 +			-e 'set envelope_from=yes' \
 +			-e "set from=ddns@${HOSTNAME}.localdomain" \
 +			-e 'set realname="служба роботов"' \
 +			-e 'set send_charset=utf-8' \
-+			-s 'новости ddns подсистемы' \
++			-s 'новости DDNS подсистемы' \
 +			'raven428@gmail.com'
  			__MSG=" $__TIME  info : $__MSG" ;;
  		7)	__MSG=" $__TIME       : $__MSG";;
