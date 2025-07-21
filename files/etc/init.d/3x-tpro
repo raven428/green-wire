@@ -17,12 +17,22 @@ start_service() {
     nft "add chain inet ${NFT} ${CHAIN} { \
     type filter hook prerouting priority mangle+10; policy accept; \
   }"
+  # accept traffic to me:
   nft "add rule inet \
     ${NFT} ${CHAIN} \
     iifname ${LAN} \
     meta mark ${MARKS} \
     fib daddr type local \
     counter return"
+  # all udp traffic to tproxy and replace tag:
+  # nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv4 \
+  #   meta l4proto { udp } counter meta mark set ${MARK} tproxy ip to 127.0.0.1:${PORT}"
+  # nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv6 \
+  #   meta l4proto { udp } counter meta mark set ${MARK} tproxy ip6 to [::1]:${PORT}"
+  # all ipv6 traffic to tproxy and replace tag:
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv6 \
+    meta l4proto { tcp, udp } counter meta mark set ${MARK} tproxy ip6 to [::1]:${PORT}"
+  # marked traffic to tproxy and replace tag:
   nft "add rule inet \
     ${NFT} ${CHAIN} \
     iifname ${LAN} \

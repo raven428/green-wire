@@ -11,7 +11,8 @@ export WRT_LAN2WAN_TAG='null'
 # export WRT_ACME_STAR='null' – use default null
 export WRT_SIZE_ROOT='2222'
 export WRT_PORT_FORWARD='null'
-export WRT_ADD_PKGS='kmod-rtw88-8821cu kmod-carl9170 wpad-basic-mbedtls'
+export WRT_ADD_PKGS='kmod-rtw88-8821cu kmod-carl9170 wpad-basic-mbedtls
+kmod-usb-net-cdc-ether kmod-usb-net-rtl8152 kmod-r8169'
 export WRT_SKIP_INSTALLER='yes'
 export WRT_SIZE_EXTRA='12222'
 export WRT_CO_SUFFIX='nr3s'

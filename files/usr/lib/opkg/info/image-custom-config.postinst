@@ -20,6 +20,7 @@ rm -fv "etc/secrets.sh"
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
 59 23 * * * /etc/init.d/atop restart
+0 * * * * /usr/bin/find /extra/opt/var/lib/collectd/rrd -mindepth 3 -maxdepth 3 -type f -name 'dns_qtype-#*.rrd' -delete -print
 EOF
 
 # move distinct configs if exists:
@@ -294,13 +295,15 @@ config rule 'mark6_lan_${r}'
 	option target 'MARK'
 	list proto 'all'
 
-config rule 'mark4_int_${r}'
-	option name 'mark4_int_${r}'
-	option dest 'ext'
-	option ipset 'vpn4_${r}'
-	option set_mark '0x1${mark}'
-	option target 'MARK'
-	list proto 'all'
+# rule disabled due detouring the whole cloudflare in vpn4_m.txt
+# to keep router available for cloudflare proxy incoming requests
+# config rule 'mark4_int_${r}'
+# 	option name 'mark4_int_${r}'
+# 	option dest 'ext'
+# 	option ipset 'vpn4_${r}'
+# 	option set_mark '0x1${mark}'
+# 	option target 'MARK'
+# 	list proto 'all'
 
 config rule 'mark6_int_${r}'
 	option name 'mark6_int_${r}'
@@ -398,18 +401,32 @@ config rule 'mark4_src_m'
 	option target 'MARK'
 	list proto 'all'
 
-config ipset 'prskt4'
-	option name 'prskt4'
+config ipset 'prskt4lan'
+	option name 'prskt4lan'
 	option family 'ipv4'
 	list match 'src_net'
 	list match 'dest_net'
-	option loadfile '/etc/nftsets/prskt4.txt'
+	option loadfile '/etc/nftsets/prskt4lan.txt'
 
-config rule 'mark4_prskt'
-	option name 'mark4_prskt'
+config rule 'mark4_prskt4lan'
+	option name 'mark4_prskt4lan'
 	option src 'lan'
 	option dest '*'
-	option ipset 'prskt4'
+	option ipset 'prskt4lan'
+	option set_mark '0x197'
+	option target 'MARK'
+	list proto 'all'
+
+config ipset 'prskt4int'
+	option name 'prskt4int'
+	option family 'ipv4'
+	list match 'dest_net'
+	option loadfile '/etc/nftsets/prskt4int.txt'
+
+config rule 'mark4_prskt4int'
+	option name 'mark4_prskt4int'
+	option dest 'ext'
+	option ipset 'prskt4int'
 	option set_mark '0x197'
 	option target 'MARK'
 	list proto 'all'
