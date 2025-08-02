@@ -33,3 +33,15 @@ core.register_fetches( -- luacheck: ignore
     )
   end
 )
+
+-- selene: allow(undefined_variable)
+core.register_service("consume_uploading", "http", function(applet) -- luacheck: ignore
+  applet:set_status(200)
+  applet:add_header("content-type", "text/plain")
+  applet:add_header("x-frame-options", "DENY")
+  applet:add_header("x-xss-protection", "1; mode=block")
+  applet:add_header("x-content-type-options", "nosniff")
+  applet:add_header("strict-transport-security", "max-age=63072000; includeSubdomains")
+  applet:start_response()
+  applet:send("Yummy")
+end)
