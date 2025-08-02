@@ -563,7 +563,26 @@
     "НСДИ",
     "xhci",
     "txpower",
-    "qtype"
+    "qtype",
+    "opest",
+    "librespeed",
+    "lispe",
+    "proxyprotocol",
+    "privkey",
+    "ipinfo",
+    "imuxsock",
+    "imklog",
+    "timereported",
+    "syslogtag",
+    "programname",
+    "rsyslogs",
+    "delaycompress",
+    "sharedscripts",
+    "postrotate",
+    "endscript",
+    "omfile",
+    "nodiscard",
+    "noatime"
   ],
   "enabled": true
 }
