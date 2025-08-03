@@ -563,7 +563,8 @@
     "НСДИ",
     "xhci",
     "txpower",
-    "qtype"
+    "qtype",
+    "opest"
   ],
   "enabled": true
 }
