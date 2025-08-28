@@ -1,5 +1,4 @@
 # OpenWRT paths overrides
-
 [DEFAULT]
-
-openwrt_system_log = /var/log/system.log
+haproxy_log = /opt/var/log/haproxy.log tail
+openwrt_system_log = /opt/var/log/messages.log tail
