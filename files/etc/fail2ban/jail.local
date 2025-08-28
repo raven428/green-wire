@@ -31,32 +31,32 @@ logpath = %(openwrt_system_log)s
 [haproxy-3x-login]
 enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="3xui2ban.map"]
-logpath = %(openwrt_system_log)s
+logpath = %(haproxy_log)s
 
 [haproxy-luci-login]
 enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="luci2ban.map"]
-logpath = %(openwrt_system_log)s
+logpath = %(haproxy_log)s
 
 [haproxy-yau-basic]
 enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="yau2ban.map"]
-logpath = %(openwrt_system_log)s
+logpath = %(haproxy_log)s
 
 [haproxy-couch-auth]
 enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="couch2ban.map"]
-logpath = %(openwrt_system_log)s
+logpath = %(haproxy_log)s
 
 [haproxy-authelia]
 enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="authelia2ban.map"]
-logpath = %(openwrt_system_log)s
+logpath = %(haproxy_log)s
 
 [haproxy-dropbear]
 enabled = true
 ipbanact = haproxy-deny-ip[blck_lst_name="dropbear.map"]
-logpath = %(openwrt_system_log)s
+logpath = %(haproxy_log)s
 
 [luci-uhttpd-auth]
 port = 5443

@@ -63,7 +63,7 @@
  	init_config
 
  	mkdir -m 0755 -p "${RUNDIR}"
-+	ln -sfv /opt/var/log/system.log /var/log/system.log
++	ln -sfv /opt/var/log/messages /var/log/messages
 
  	procd_open_instance
 
@@ -81,3 +81,34 @@
  }
 
  reload_service()
+
+--- etc/init.d/librespeed-go-orig	2025-10-21 08:16:22.456535933 +0000
++++ etc/init.d/librespeed-go	2025-10-21 08:20:33.242249346 +0000
+@@ -68,9 +68,12 @@
+
+ 	procd_set_param limits core="unlimited"
+ 	procd_set_param limits nofile="1000000 1000000"
+-	procd_set_param respawn
+ 	procd_set_param stderr 1
+ 	procd_set_param user librespeed
++	procd_set_param respawn \
++		${respawn_threshold:-333} \
++		${respawn_timeout:-3} \
++		${respawn_retry:-0}
+
+ 	procd_add_jail "$CONF" log
+ 	procd_add_jail_mount "$TMPCONF"
+
+--- etc/init.d/rsyslog-orig	2025-10-28 12:25:45.265256293 +0000
++++ etc/init.d/rsyslog	2025-10-28 12:29:59.000000000 +0000
+@@ -103,6 +103,10 @@
+ start_service() {
+ 	expand_config
+ 	procd_open_instance
++	procd_set_param respawn \
++		${respawn_threshold:-333} \
++		${respawn_timeout:-3} \
++		${respawn_retry:-0}
+ 	procd_set_param command /usr/sbin/rsyslogd -f ${CONFIG_FILE} -n
+ 	procd_close_instance
+ }
