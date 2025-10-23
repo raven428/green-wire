@@ -49,6 +49,9 @@ start_service() {
     meta l4proto { tcp, udp } \
     counter meta mark set ${MARK} \
     tproxy ip6 to [::1]:${PORT}"
+  # rest of ipv6 traffic to wireguard:
+  # nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv6 \
+  #   counter meta mark set 0x100"
   ip rule add fwmark ${MARK} table ${TABLE} priority 100
   ip route add local 0.0.0.0/0 dev lo table ${TABLE}
   ip -6 rule add fwmark ${MARK} table ${TABLE} priority 100
