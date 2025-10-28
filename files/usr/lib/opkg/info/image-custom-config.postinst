@@ -33,6 +33,10 @@ EOF
   done
 }
 
+# remove nodiscard from standard mounts
+[[ "${WRT_CO_SUFFIX}" = 'none' ]] && /usr/bin/env sed -i \
+  "s/,nodiscard//g ;" 'etc/uci-defaults/11-format-extra.sh'
+
 # replace placeholders:
 /usr/bin/env sed -i \
   "
