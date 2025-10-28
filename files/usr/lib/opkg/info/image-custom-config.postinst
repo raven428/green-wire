@@ -33,6 +33,10 @@ EOF
   done
 }
 
+# remove nodiscard from standard mounts
+[[ "${WRT_CO_SUFFIX}" = 'none' ]] && /usr/bin/env sed -i \
+  "s/,nodiscard//g ;" 'etc/uci-defaults/11-format-extra.sh'
+
 # replace placeholders:
 /usr/bin/env sed -i \
   "
@@ -99,6 +103,7 @@ chmod +x "$1/000-printenv.sh"
 /usr/bin/env ln -vsf /usr/bin/msmtpq usr/sbin/sendmail
 /usr/bin/env ln -vsf /dev/null sent
 /usr/bin/env ln -vsf /dev/null root/sent
+/usr/bin/env ln -vsf /extra/www/OpenSpeedTest/downloading www/OpenSpeedTest/downloading
 
 # patches:
 for f in patches/*.diff; do
