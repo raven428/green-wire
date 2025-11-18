@@ -16,14 +16,14 @@
 - build images
 
   ```bash
-  VER=029 ./build.sh
+  VER=030 ./build.sh
   ```
 
 - or make tag and send to release:
 
   ```bash
   git checkout master && git pull
-  git tag -fm $(git branch --sho) 029 && git push origin --force $(git describe)
+  git tag -fm $(git branch --sho) 030 && git push origin --force $(git describe)
   ```
 
 ## Clean eMMC install steps
