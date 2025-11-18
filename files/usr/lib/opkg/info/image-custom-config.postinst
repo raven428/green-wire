@@ -20,7 +20,9 @@ rm -fv "etc/secrets.sh"
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
 59 23 * * * /etc/init.d/atop restart
-0 * * * * /usr/bin/find /extra/opt/var/lib/collectd/rrd -mindepth 3 -maxdepth 3 -type f -name 'dns_qtype-#*.rrd' -delete -print
+11 * * * * /etc/init.d/collectd restart
+33 * * * * /usr/sbin/logrotate /etc/logrotate.conf
+0 * * * * /usr/bin/env bash -c "/usr/bin/find /extra/opt/var/lib/collectd/rrd -mindepth 3 -maxdepth 3 -type f -name 'dns_qtype-\$(printf '\043')*.rrd' -delete"
 EOF
 
 # move distinct configs if exists:
@@ -30,6 +32,10 @@ EOF
       /usr/bin/env mv -vf "${config}-${WRT_CO_SUFFIX}" "${config}"
   done
 }
+
+# remove nodiscard from standard mounts
+[[ "${WRT_CO_SUFFIX}" = 'none' ]] && /usr/bin/env sed -i \
+  "s/,nodiscard//g ;" 'etc/uci-defaults/11-format-extra.sh'
 
 # replace placeholders:
 /usr/bin/env sed -i \
@@ -97,6 +103,7 @@ chmod +x "$1/000-printenv.sh"
 /usr/bin/env ln -vsf /usr/bin/msmtpq usr/sbin/sendmail
 /usr/bin/env ln -vsf /dev/null sent
 /usr/bin/env ln -vsf /dev/null root/sent
+/usr/bin/env ln -vsf /extra/www/OpenSpeedTest/downloading www/OpenSpeedTest/downloading
 
 # patches:
 for f in patches/*.diff; do
