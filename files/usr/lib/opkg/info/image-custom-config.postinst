@@ -19,7 +19,7 @@ rm -fv "etc/secrets.sh"
 # crontab:
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
-59 23 * * * /etc/init.d/atop restart
+59 23 * * * /usr/bin/env bash -c "sleep 55 && /etc/init.d/atop stop && sleep 11 && /etc/init.d/atop start"
 11 * * * * /etc/init.d/collectd restart
 33 * * * * /usr/sbin/logrotate /etc/logrotate.conf
 0 * * * * /usr/bin/env bash -c "/usr/bin/find /extra/opt/var/lib/collectd/rrd -mindepth 3 -maxdepth 3 -type f -name 'dns_qtype-\$(printf '\043')*.rrd' -delete"
