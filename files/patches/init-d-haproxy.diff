@@ -23,7 +23,7 @@
 +	procd_set_param stderr 1
  	procd_set_param reload_signal USR2
 -	procd_set_param command $HAPROXY_BIN -q -W -db -f "$HAPROXY_CONFIG"
-+	procd_set_param command bash -c "cd ${HAPROXY_DIR} && exec ${HAPROXY_BIN} -q -W -db -f ${HAPROXY_CONFIG} 2>&1"
++	procd_set_param command bash -c "cd ${HAPROXY_DIR} && exec -a haproxy ${HAPROXY_BIN} -q -W -db -f ${HAPROXY_CONFIG} 2>&1"
  	procd_close_instance
  }
 
@@ -32,5 +32,5 @@
  extra_command "check" "Check haproxy config"
  check() {
 -	$HAPROXY_BIN -c -q -V -f $HAPROXY_CONFIG
-+	${HAPROXY_BIN} -c -q -V -f ${HAPROXY_CONFIG}
++	cd "${HAPROXY_DIR}" && ${HAPROXY_BIN} -c -q -V -f "${HAPROXY_CONFIG}"
  }

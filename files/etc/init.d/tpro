@@ -24,6 +24,32 @@ start_service() {
     meta mark ${MARKS} \
     fib daddr type local \
     counter return"
+
+  # ct mark (avoid extra rules for already marked packets)
+  # log prefix \"MARK4 \" level info
+  # log prefix \"MARK6 \" level info
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv4 meta l4proto udp \
+    ct mark ${MARK} meta mark set ${MARK} tproxy ip to 127.0.0.1:${PORT}"
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv6 meta l4proto udp \
+    ct mark ${MARK} meta mark set ${MARK} tproxy ip6 to [::1]:${PORT}"
+
+  # stun:
+  # 3478, 19305 – google meet
+  # log prefix \"STUN \" level info
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta l4proto udp \
+    @th,96,32 0x2112a442 counter ct mark set ${MARK}"
+
+  # discord
+  # log prefix \"DISCO \" level info
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta l4proto udp \
+    @th,64,32 0x00010046 counter ct mark set ${MARK}"
+
+  # ct mark (handle marked by one of previous rules)
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv4 meta l4proto udp \
+    ct mark ${MARK} meta mark set ${MARK} tproxy ip to 127.0.0.1:${PORT}"
+  nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv6 meta l4proto udp \
+    ct mark ${MARK} meta mark set ${MARK} tproxy ip6 to [::1]:${PORT}"
+
   # all udp traffic to tproxy and replace tag:
   # nft "add rule inet ${NFT} ${CHAIN} iifname ${LAN} meta nfproto ipv4 \
   #   meta l4proto { udp } counter meta mark set ${MARK} tproxy ip to 127.0.0.1:${PORT}"
