@@ -18,12 +18,12 @@ start_service() {
     ${respawn_timeout:-3} \
     ${respawn_retry:-0}
   procd_set_param limits nproc='32768 65536' nofile='131072 524288'
-  procd_set_param command sh -c "cd ${XUI_DB_FOLDER} && exec -a xray \
+  procd_set_param command bash -c "cd ${XUI_DB_FOLDER} && exec -a xray \
     ${XUI_DB_FOLDER}/3x-ui"
   procd_close_instance
 }
 
 service_triggers() {
-  procd_add_reload_trigger "3x-ui"
-  procd_add_raw_trigger acme.renew 5000 /etc/init.d/3x-ui reload
+  procd_add_reload_trigger "xray"
+  procd_add_raw_trigger acme.renew 5000 /etc/init.d/xray restart
 }
