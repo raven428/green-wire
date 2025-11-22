@@ -173,7 +173,8 @@ EOF
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
   logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
-  pigz busybox gzip iptraf-ng nload -logd librespeed-go f2fsck rsyslog \
+  pigz busybox gzip iptraf-ng nload -logd librespeed-go f2fsck rsyslog speedtest-go \
+  python3-speedtest-cli \
   ${WRT_ADD_PKGS//$'\n'/ } \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
