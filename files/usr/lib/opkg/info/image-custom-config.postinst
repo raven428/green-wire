@@ -566,5 +566,15 @@ echo "OPENWRT_GREWIBU='${WRT_GREWIBU}'" >>etc/os-release
   "s/(.*OpenWrt\s+[0-9]+\..+\,\s+[0-9a-z\-]+)\s*/\1 gwb${WRT_GREWIBU}/" \
   etc/banner
 
+# tcping binary:
+(
+  cd usr/bin
+  /usr/bin/env curl -Lm 111 -o - "https://github.com/pouriyajamshidi/tcping/releases\
+/download/v2.7.1/tcping-linux-arm64-static.tar.gz" |
+    /usr/bin/env tar xzvf - 'tcping'
+	/usr/bin/env chown root:root tcping
+  /usr/bin/env chmod 755 tcping
+)
+
 # copy for observation
 /usr/bin/env cp -r etc "/builder/bin/targets/${WRT_BOARD}"
