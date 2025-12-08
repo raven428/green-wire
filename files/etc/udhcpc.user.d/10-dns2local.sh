@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 domestic_domains='pjreo74.ru
+/lkfl2.nalog.ru
 /farmlend.ru'
 # Yandex and НСДИ
-domestic_servers='77.88.8.1 77.88.8.9 195.208.4.1 195.208.5.1'
+domestic_servers='77.88.8.1 77.88.8.8 195.208.4.1 195.208.5.1'
 [[ -z "${PROTO_DNS:-}" ]] &&
   echo 'var PROTO_DNS isn'\''t in env' |
   /usr/bin/env logger -t 'udhcpc'
