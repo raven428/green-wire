@@ -19,7 +19,7 @@ rm -fv "etc/secrets.sh"
 # crontab:
 /usr/bin/env cat <<EOF >>etc/crontabs/root
 */20 * * * * /usr/bin/msmtpq --q-mgmt -r
-59 23 * * * /etc/init.d/atop restart
+59 23 * * * /usr/bin/env bash -c "sleep 55 && /etc/init.d/atop stop && sleep 11 && /etc/init.d/atop start"
 11 * * * * /etc/init.d/collectd restart
 33 * * * * /usr/sbin/logrotate /etc/logrotate.conf
 0 * * * * /usr/bin/env bash -c "/usr/bin/find /extra/opt/var/lib/collectd/rrd -mindepth 3 -maxdepth 3 -type f -name 'dns_qtype-\$(printf '\043')*.rrd' -delete"
@@ -565,6 +565,16 @@ echo "OPENWRT_GREWIBU='${WRT_GREWIBU}'" >>etc/os-release
 /usr/bin/env sed -ri \
   "s/(.*OpenWrt\s+[0-9]+\..+\,\s+[0-9a-z\-]+)\s*/\1 gwb${WRT_GREWIBU}/" \
   etc/banner
+
+# tcping binary:
+(
+  cd usr/bin
+  /usr/bin/env curl -Lm 111 -o - "https://github.com/pouriyajamshidi/tcping/releases\
+/download/v2.7.1/tcping-linux-arm64-static.tar.gz" |
+    /usr/bin/env tar xzvf - 'tcping'
+	/usr/bin/env chown root:root tcping
+  /usr/bin/env chmod 755 tcping
+)
 
 # copy for observation
 /usr/bin/env cp -r etc "/builder/bin/targets/${WRT_BOARD}"

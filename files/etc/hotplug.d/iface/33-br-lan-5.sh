@@ -4,5 +4,5 @@
   /usr/bin/env logger -t 'acme-startup'
 /usr/bin/env ip route add ::/0 dev br-lan.5 2>&1 |
   /usr/bin/env logger -t 'route-wan'
-/etc/init.d/3x-tpro restart 2>&1 |
-  /usr/bin/env logger -t '3x-tpro'
+/etc/init.d/tpro restart 2>&1 |
+  /usr/bin/env logger -t 'tpro'

@@ -23,7 +23,7 @@ if [[ "$ACTION" == "issued" || "$ACTION" == "renewed" ]]; then
       '/etc/ssl/private/main.pem'
     # sleep before restart to msmtpq able to send mail
     /usr/bin/env sleep 7
-    for svc in 3x-ui uhttpd nginx haproxy; do
+    for svc in xray uhttpd nginx haproxy; do
       /etc/init.d/${svc} status && /etc/init.d/${svc} restart
     done
   } 2>&1 | /usr/bin/env logger -t 'acme-issued'

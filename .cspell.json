@@ -587,7 +587,13 @@
     "nomail",
     "olddir",
     "missingok",
-    "dateext"
+    "dateext",
+    "tcping",
+    "xzvf",
+    "nping",
+    "httping",
+    "nalog",
+    "lkfl"
   ],
   "enabled": true
 }
