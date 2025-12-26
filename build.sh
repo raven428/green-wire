@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -ueo pipefail
 [[ -d 'green-wise' ]] ||
-  /usr/bin/env git clone "https://${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
+  /usr/bin/env git clone \
+    "https://x-access-token:${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
 file_base=${NAME2BUILD:-"werter"}
 conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
