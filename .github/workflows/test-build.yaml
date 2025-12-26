@@ -86,3 +86,20 @@ jobs:
         uses: oxsecurity/megalinter@v9
         env:
           VALIDATE_ALL_CODEBASE: true
+  all-green:
+    name: all green
+    timeout-minutes: 3
+    runs-on: ubuntu-latest
+    needs:
+      - linters
+      - device-images
+    if: always()
+    permissions:
+      checks: read
+    steps:
+      - name: waiting for checks success
+        uses: poseidon/wait-for-status-checks@v0.6.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ignore: all green, foobar
+          timeout: 111s
