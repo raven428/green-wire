@@ -58,3 +58,4 @@ LUA_LUACHECK_FILTER_REGEX_EXCLUDE: "\
   files/etc/haproxy/lua/auth-request.lua|\
   files/etc/haproxy/lua/haproxy-lua-http/http.lua\
   "
+REPOSITORY_KINGFISHER_ARGUMENTS: "--exclude .git"
