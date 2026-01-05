@@ -172,7 +172,7 @@ proxy = 'socks5://dnscrypt:moxerwjLmD@127.0.0.1:19645'
 ## Only for DoH servers
 
 http_proxy = 'socks5://dnscrypt:moxerwjLmD@127.0.0.1:19645'
-#http_proxy = 'http://dnscrypt:KE8yw6Lmqb@127.0.0.1:19641'
+# http_proxy = 'http://dnscrypt:KE8yw6Lmqb@127.0.0.1:19641'  # kingfisher:ignore
 # secretlint-enable
 
 ## How long a DNS query will wait for a response, in milliseconds.
