@@ -8,3 +8,10 @@
 # https://servers.opennicproject.org - OpenNIC DoT servers:
 2603:c020:8006:9211:53::53
 2603:c020:800c:ebeb:53::53
+
+# bgpq4 -6AF "%n/%l\n" AS62041 AS211157 AS44907
+# https://github.com/Loyalsoldier/geoip/blob/release/text/telegram.txt
+2a0a:f280::/29
+2001:67c:4e8::/48
+2001:b28:f23c::/48
+2a0a:f280:203::/48
