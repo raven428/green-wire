@@ -6,6 +6,7 @@ host_request_interval = "1s"
 # Retry settings
 max_retries = 5
 retry_wait_time = 10
+exclude_path = ["files/etc/authelia.yaml"]
 
 [hosts."github.com"]
 concurrency = 1

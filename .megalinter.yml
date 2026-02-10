@@ -1,4 +1,7 @@
 ---
+DISABLE_LINTERS:
+  - ACTION_ZIZMOR # как-нибудь потом
+  - REPOSITORY_OSV_SCANNER # no packages
 # ENABLE_LINTERS:
 #   - BASH_SHELLCHECK
 #   - EDITORCONFIG_EDITORCONFIG_CHECKER
@@ -60,3 +63,7 @@ LUA_LUACHECK_FILTER_REGEX_EXCLUDE: "\
   "
 REPOSITORY_KINGFISHER_ARGUMENTS: "--exclude .git"
 SPELL_LYCHEE_CONFIG_FILE: ".lychee.toml"
+SPELL_CSPELL_PRE_COMMANDS:
+  - command: "npm install --prefix /node-deps @cspell/dict-ru_ru
+      @cspell/dict-software-terms"
+    cwd: root
