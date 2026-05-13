@@ -198,7 +198,7 @@ EOF
   coreutils-tr coreutils-true coreutils-truncate coreutils-tsort coreutils-tty \
   coreutils-uname coreutils-unexpand coreutils-uniq coreutils-unlink psmisc \
   coreutils-users coreutils-vdir coreutils-wc coreutils-who coreutils-whoami \
-  coreutils-yes net-tools-route \
+  coreutils-yes net-tools-route ntpd ntp-utils \
   \
   kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
   kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
