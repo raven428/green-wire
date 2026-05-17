@@ -31,7 +31,7 @@ jobs:
           echo "matrix_list=${JSON_LIST}" >> "${GITHUB_OUTPUT}"
   device-images:
     name: "[${{ matrix.element }}] image"
-    timeout-minutes: 22
+    timeout-minutes: 55
     needs: define-matrix
     strategy:
       fail-fast: false
