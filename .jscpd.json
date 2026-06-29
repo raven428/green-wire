@@ -1,0 +1,3 @@
+{
+  "ignore": ["files/etc/init.d/*", "files/patches/*", "files/patches/**"]
+}

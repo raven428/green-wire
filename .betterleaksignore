@@ -1,0 +1,8 @@
+files/etc/ssl/private/main.key:private-key:1
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:790
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:803
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:816
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:826
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:838
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:849
+files/etc/dnscrypt-proxy2/dnscrypt-proxy.toml:generic-api-key:864

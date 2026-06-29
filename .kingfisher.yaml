@@ -1,0 +1,5 @@
+---
+filters:
+  exclude:
+    - ".git"
+    - "files/etc/ssl/private/main.key"
