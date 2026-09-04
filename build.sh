@@ -174,7 +174,7 @@ EOF
   logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
   pigz busybox gzip iptraf-ng nload -logd librespeed-go f2fsck rsyslog speedtest-go \
-  python3-speedtest-cli nping-ssl httping \
+  python3-speedtest-cli nping-ssl httping -odhcpd-ipv6only \
   ${WRT_ADD_PKGS//$'\n'/ } \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
@@ -198,7 +198,7 @@ EOF
   coreutils-tr coreutils-true coreutils-truncate coreutils-tsort coreutils-tty \
   coreutils-uname coreutils-unexpand coreutils-uniq coreutils-unlink psmisc \
   coreutils-users coreutils-vdir coreutils-wc coreutils-who coreutils-whoami \
-  coreutils-yes net-tools-route \
+  coreutils-yes net-tools-route ntpd ntp-utils \
   \
   kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
   kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
@@ -303,7 +303,8 @@ src="release/${image_prefix}-ext4-sysupgrade.img.gz"
     kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
     kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
     \
-    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod ${WRT_ADD_PKGS} \
+    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod -odhcpd-ipv6only \
+    ${WRT_ADD_PKGS} \
     ' \
   "
   /usr/bin/env zcat "release/${image_prefix}-sdcard.img.gz" >"${dest_prefix}-install.img"

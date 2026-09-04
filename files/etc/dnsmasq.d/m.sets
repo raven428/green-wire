@@ -25,6 +25,8 @@ barnesandnoble.com
 grammarly.io
 grammarly.com
 symantecliveupdate.com
+broadcom.com
+symantec.com
 mdza.io
 meduza.io
 zona.media
@@ -78,6 +80,7 @@ ee
 eu
 currenttime.tv
 navalny.com
+navalnyteam.com
 june12.io
 navalny.shop
 politica.media
@@ -143,7 +146,6 @@ openweathermap.org
 inoreader.com
 trakt.tv
 ashbyhq.com
-sonic-drome.o6a.ru
 vps.today
 hosting.country
 podman.io
@@ -174,6 +176,7 @@ meet.google.com
 antigravity.google
 privatevpn.com
 redshieldvpn.xyz
+redshieldvpn.com
 windscribe.com
 mullvad.net
 vpnlove.org
@@ -184,6 +187,61 @@ istories.media
 tvrain.tv
 bill.com
 ycombinator.com
+opensuse.org
+opensanctions.org
+macosworld.ru
+heureka.group
+z.ai
+theins.ru
+proxyline.net
+rublacklist.net
+eversolo.com
+zidoo.tv
+archive.ph
+unicode-table.com
+symbl.cc
+githubstatus.com
+notebookcheck.com
+openrouter.ai
+alexhost.com
+tvrain.tv
+tavily.com
+serper.dev
+ycombinator.com
+liteserver.nl
+segment.com
+newrelic.com
+awswaf.com
+trustpilot.net
+trustpilot.com
+happ.su
+stripe.network
+intercom.io
+en25.com
+sentry.io
+recaptcha.net
+stripe.com
+mongodb-cdn.com
+whoer.com
+browserleaks.com
+nedo.fyi
+pulumi.com
+pricing.day
+putinwar.day
+yulianavalnaya.com
+fbk.info
+ccode.dev
+prefect.io
+howtogeek.com
+letsencrypt.org
+musicbrainz.org
+nuetzlich.net
+perplexity.ai
+qingpingiot.com
+www.google.com
+problembo.com
+airbnb.com
+pi.dev
 
 # torrent
 lostfilm.tv
@@ -252,8 +310,12 @@ megapeer.top
 gtorrent.club
 iditelesom.org
 iditelesombase.org
+kovcheg.live
+stoparmy.org
 wellfound.com
 indeed.com
+claudehub.fun
+claudehub.rest
 
 # https://github.com/blackmatrix7/ios_rule_script and
 # https://github.com/v2fly/domain-list-community bellow
@@ -1073,3 +1135,48 @@ telesco.pe
 tg.dev
 tx.me
 usercontent.dev
+
+# slack
+slack-core.com
+slack-edge.com
+slack-files.com
+slack-imgs.com
+slack-msgs.com
+slack-redir.net
+slack.com
+slackb.com
+slackcertified.com
+slackdemo.com
+slackhq.com
+
+# 1password
+1infra.net
+1password.ca
+1password.co
+1password.com
+1password.community
+1password.eu
+1password.io
+1passwordservices.com
+1passwordusercontent.ca
+1passwordusercontent.com
+1passwordusercontent.eu
+agilebits.com
+passage.id
+1password.drift.click
+
+# gemini
+deepmind.com
+deepmind.google
+geller-pa.googleapis.com
+generativelanguage.googleapis.com
+proactivebackend-pa.googleapis.com
+ai.google.dev
+alkalicore-pa.clients6.google.com
+alkalimakersuite-pa.clients6.google.com
+generativeai.google
+makersuite.google.com
+aistudio.google.com
+bard.google.com
+gemini.google.com
+gemini.google
