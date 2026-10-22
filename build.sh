@@ -13,7 +13,7 @@ source "${conf_file}"
 : "${WRT_HOSTNAME:="werter"}"
 : "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
 : "${DISABLED_SERVICES:="dockerd podman bird monit softflowd nfcapd tun2ray nginx \
-authelia swanctl"}"
+authelia"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
 for secret in ${secrets}; do
@@ -91,12 +91,8 @@ export WRT_AUTHELIA_URI='${WRT_AUTHELIA_URI:-"s3cre1pathtAuthe1iaURI4pr0tect"}'
 export WRT_AUTHELIA_JWT='${WRT_AUTHELIA_JWT:-"s3cre1jwt0kenAuthe1ia4pr0tect"}'
 export WRT_AUTHELIA_SES='${WRT_AUTHELIA_SES:-"s3cre1se5si0ntAuthe1ia4pr0tect"}'
 export WRT_AUTHELIA_DBKEY='${WRT_AUTHELIA_DBKEY:-"s3cre1DaTabKe4Authe1ia4pr0tect"}'
-export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"10.23.45.67"}'
-export WRT_L2TP_LOGIN='${WRT_L2TP_LOGIN:-"l2tp-user"}'
-export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
 export WRT_LAN2WAN_TAG='${WRT_LAN2WAN_TAG:-"null"}'
 export WRT_ACME_STAR='${WRT_ACME_STAR:-"null"}'
-export WRT_IPSEC_PSK='${WRT_IPSEC_PSK:-"s3cre1P5k4ipSek4pr0tect"}'
 export WRT_WARP_REGIONS='${WRT_WARP_REGIONS:-"m"}'
 export WRT_WARP_REG='${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}'
 export WRT_OTHER_ROUTES='${WRT_OTHER_ROUTES:-"tr cy kz ge de us ng cl bg it ar uy \
@@ -144,13 +140,6 @@ src/gz openwrt_routing   ${r}/packages/${WRT_ARCH}/routing
 src/gz openwrt_packages  ${r}/packages/${WRT_ARCH}/packages
 src/gz openwrt_telephony ${r}/packages/${WRT_ARCH}/telephony
 EOF
-[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
-  DISABLED_SERVICES="${DISABLED_SERVICES} ipsec"
-[[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
-  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
-  DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
 /usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw -u 0 \
   -v "$(pwd)/release:/builder/bin/targets/${WRT_BOARD}:rw" \
@@ -172,7 +161,7 @@ EOF
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
-  logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
+  logrotate nmap-full sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
   pigz busybox gzip iptraf-ng nload -logd librespeed-go f2fsck rsyslog speedtest-go \
   python3-speedtest-cli nping-ssl httping -odhcpd-ipv6only \
