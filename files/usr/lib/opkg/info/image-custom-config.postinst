@@ -196,7 +196,6 @@ config zone 'zone_ext'
 	option masq6 '1'
 	option mtu_fix '1'
 	list network 'tun2ray'
-	list network 'prskt'
 	list network 'wan4'
 	list network 'wan6'
 EOF
@@ -407,36 +406,6 @@ config rule 'mark4_src_m'
 	option set_mark '0x100'
 	option target 'MARK'
 	list proto 'all'
-
-config ipset 'prskt4lan'
-	option name 'prskt4lan'
-	option family 'ipv4'
-	list match 'src_net'
-	list match 'dest_net'
-	option loadfile '/etc/nftsets/prskt4lan.txt'
-
-config rule 'mark4_prskt4lan'
-	option name 'mark4_prskt4lan'
-	option src 'lan'
-	option dest '*'
-	option ipset 'prskt4lan'
-	option set_mark '0x197'
-	option target 'MARK'
-	list proto 'all'
-
-config ipset 'prskt4int'
-	option name 'prskt4int'
-	option family 'ipv4'
-	list match 'dest_net'
-	option loadfile '/etc/nftsets/prskt4int.txt'
-
-config rule 'mark4_prskt4int'
-	option name 'mark4_prskt4int'
-	option dest 'ext'
-	option ipset 'prskt4int'
-	option set_mark '0x197'
-	option target 'MARK'
-	list proto 'all'
 EOF
 
 # resolf.conf
@@ -491,51 +460,6 @@ mac_filter=''
 }
 /usr/bin/env sed -i "s/REPLACE_mac_filter_REPLACE/${mac_filter}/g ;" \
   'etc/config/wireless'
-
-# l2tp thru ipsec
-[[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
-  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
-  /usr/bin/env cat <<EOF >>etc/config/network
-
-config interface 'prskt'
-	option proto 'l2tp'
-	option server '${WRT_L2TP_SERVER}'
-	option username '${WRT_L2TP_LOGIN}'
-	option password '${WRT_L2TP_PASSWD}'
-	option ip4table 'prskt'
-	option ip6table 'prskt'
-	option keepalive '5, 5'
-	option disabled '0'
-	option auto '1'
-	option ipv6 '0'
-EOF
-}
-[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
-  /usr/bin/env cat <<EOF >etc/ipsec.conf
-# ipsec config
-config setup
-	uniqueids=no
-conn prskt
-	authby=secret
-	auto=start
-	keyexchange=ikev1
-	type=transport
-	left=%defaultroute
-	leftprotoport=17/%any
-	right=${WRT_L2TP_SERVER}
-	rightid=%any
-	rightprotoport=17/1701
-	dpddelay=22
-	dpdtimeout=55
-	dpdaction=restart
-	keyingtries=0
-	lifetime=9999s
-	ikelifetime=11111s
-EOF
-  echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
-}
 
 # removing lan tag on wan port:
 [[ ${WRT_LAN2WAN_TAG:-"null"} == 'null' ]] && /usr/bin/env sed \
