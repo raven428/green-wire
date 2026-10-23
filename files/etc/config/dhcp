@@ -24,6 +24,7 @@ config dnsmasq 'dnsmasq'
 	option noresolv '1'
 	option localuse '0'
 	option confdir '/etc/dnsmasq.d'
+	option logdhcp '1'
 
 config dhcp 'lan'
 	option interface 'lan'
@@ -37,9 +38,9 @@ config dhcp 'lan'
 	list ra_flags 'managed-config'
 	list ra_flags 'other-config'
 	option ra_default '1'
-	list dhcp_option '42,192.168.77.112'  # ntp-servers
-	list dhcp_option '44,192.168.77.114'  # netbios-name-servers (WINS)
-	list dhcp_option '45,192.168.77.114'  # netbios-dd-server
+	list dhcp_option '42,192.168.69.222'  # ntp-servers
+	list dhcp_option '44,192.168.69.114'  # netbios-name-servers (WINS)
+	list dhcp_option '45,192.168.69.114'  # netbios-dd-server
 	list dhcp_option '46,8'               # netbios-node-type (8 = H-node)
 	list dhcp_option '15,lan'
 	list dhcp_option '119,local,REPLACE_secret_tld_REPLACE,home.REPLACE_secret_tld_REPLACE,local.REPLACE_secret_tld_REPLACE'
@@ -55,9 +56,3 @@ config dhcp 'wan4'
 config dhcp 'wan6'
 	option interface 'wan6'
 	option ignore '1'
-
-config odhcpd 'odhcpd'
-	option maindhcp '0'
-	option leasefile '/tmp/hosts/odhcpd'
-	option leasetrigger '/usr/sbin/odhcpd-update'
-	option loglevel '4'

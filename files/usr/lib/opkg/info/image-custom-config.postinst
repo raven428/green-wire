@@ -196,7 +196,7 @@ config zone 'zone_ext'
 	option masq6 '1'
 	option mtu_fix '1'
 	list network 'tun2ray'
-	list network 'prskt'
+	list network 'ovepn'
 	list network 'wan4'
 	list network 'wan6'
 EOF
@@ -408,32 +408,23 @@ config rule 'mark4_src_m'
 	option target 'MARK'
 	list proto 'all'
 
-config ipset 'prskt4lan'
-	option name 'prskt4lan'
+config ipset 'ovepn4lan'
+	option name 'ovepn4lan'
 	option family 'ipv4'
 	list match 'src_net'
-	list match 'dest_net'
-	option loadfile '/etc/nftsets/prskt4lan.txt'
+	option loadfile '/etc/nftsets/ovepn4lan.txt'
 
-config rule 'mark4_prskt4lan'
-	option name 'mark4_prskt4lan'
-	option src 'lan'
-	option dest '*'
-	option ipset 'prskt4lan'
-	option set_mark '0x197'
-	option target 'MARK'
-	list proto 'all'
-
-config ipset 'prskt4int'
-	option name 'prskt4int'
+config ipset 'ovepn4dst'
+	option name 'ovepn4dst'
 	option family 'ipv4'
 	list match 'dest_net'
-	option loadfile '/etc/nftsets/prskt4int.txt'
+	option loadfile '/var/run/ovepn4dst.txt'
 
-config rule 'mark4_prskt4int'
-	option name 'mark4_prskt4int'
+config rule 'mark4_ovepn4dst'
+	option name 'mark4_ovepn4dst'
 	option dest 'ext'
-	option ipset 'prskt4int'
+	option mark '!0x196'
+	option ipset 'ovepn4dst'
 	option set_mark '0x197'
 	option target 'MARK'
 	list proto 'all'
@@ -492,49 +483,108 @@ mac_filter=''
 /usr/bin/env sed -i "s/REPLACE_mac_filter_REPLACE/${mac_filter}/g ;" \
   'etc/config/wireless'
 
-# l2tp thru ipsec
-[[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
-  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
+# openvpn with totp
+[[ ${WRT_OVEPN_REMOTES:-"null"} != 'null' &&
+  ${WRT_OVEPN_LOGIN:-"null"} != 'null' &&
+  ${WRT_OVEPN_PASSWD:-"null"} != 'null' &&
+  ${WRT_OVEPN_TOTP_KEY:-"null"} != 'null' &&
+  ${WRT_OVEPN_CA:-"null"} != 'null' ]] && {
   /usr/bin/env cat <<EOF >>etc/config/network
 
-config interface 'prskt'
-	option proto 'l2tp'
-	option server '${WRT_L2TP_SERVER}'
-	option username '${WRT_L2TP_LOGIN}'
-	option password '${WRT_L2TP_PASSWD}'
-	option ip4table 'prskt'
-	option ip6table 'prskt'
-	option keepalive '5, 5'
-	option disabled '0'
-	option auto '1'
-	option ipv6 '0'
+config interface 'ovepn'
+	option device 'tun-ovepn'
+	option proto 'none'
+
+config rule 'ovepn_ru4'
+	option name 'ovepn'
+	option mark '0x197'
+	option priority '100'
+	option lookup 'ovepn'
+
+config route 'ovepn_ro4'
+	option name 'ovepn'
+	option interface 'ovepn'
+	option table 'ovepn'
+	option target '0.0.0.0/0'
 EOF
-}
-[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] && {
-  /usr/bin/env cat <<EOF >etc/ipsec.conf
-# ipsec config
-config setup
-	uniqueids=no
-conn prskt
-	authby=secret
-	auto=start
-	keyexchange=ikev1
-	type=transport
-	left=%defaultroute
-	leftprotoport=17/%any
-	right=${WRT_L2TP_SERVER}
-	rightid=%any
-	rightprotoport=17/1701
-	dpddelay=22
-	dpdtimeout=55
-	dpdaction=restart
-	keyingtries=0
-	lifetime=9999s
-	ikelifetime=11111s
+  /usr/bin/env cat <<EOF >etc/config/openvpn
+config openvpn 'ovepn'
+	option enabled '1'
+	option config '/etc/openvpn/ovepn.ovpn'
 EOF
-  echo "%any ${WRT_L2TP_SERVER} : PSK '${WRT_IPSEC_PSK}'" >>etc/ipsec.secrets
+  /usr/bin/env mkdir -vp etc/openvpn
+  remotes=''
+  IFS=',' read -ra array <<<"${WRT_OVEPN_REMOTES}"
+  for r in "${array[@]}"; do
+    r="${r#"${r%%[![:space:]]*}"}"
+    r="${r%"${r##*[![:space:]]}"}"
+    [[ -z "${r}" ]] && continue
+    if [[ "${r}" == *:* ]]; then
+      remotes="${remotes}remote ${r%:*} ${r##*:}"$'\n'
+    else
+      remotes="${remotes}remote ${r}"$'\n'
+    fi
+  done
+  domains=''
+  [[ ${WRT_OVEPN_DOMAINS:-"null"} == 'null' ]] ||
+    domains="setenv ovepn_domains \"${WRT_OVEPN_DOMAINS}\""$'\n'
+  (
+    umask 077
+    /usr/bin/env printf '%s' "client
+dev tun-ovepn
+dev-type tun
+proto udp
+${remotes}server-poll-timeout 5
+resolv-retry 5
+nobind
+persist-key
+persist-tun
+remote-cert-tls server
+data-ciphers AES-256-GCM
+data-ciphers-fallback AES-256-CBC
+comp-lzo
+verb 2
+script-security 2
+ping 15
+ping-restart 60
+auth-user-pass /var/run/ovepn.auth
+auth-nocache
+auth-retry nointeract
+route-noexec
+mark 406
+${domains}<ca>
+${WRT_OVEPN_CA}
+</ca>
+" >etc/openvpn/ovepn.ovpn
+    /usr/bin/env printf '%s\n%s\n' "${WRT_OVEPN_LOGIN}" "${WRT_OVEPN_PASSWD}" \
+      >etc/openvpn/ovepn.cred
+    /usr/bin/env printf '%s\n' "${WRT_OVEPN_TOTP_KEY}" >etc/openvpn/ovepn.totp
+    oath_args=()
+    has_base32='no'
+    has_totp='no'
+    [[ ${WRT_OVEPN_TOTP_PARAMS:-"null"} == 'null' ]] || {
+      IFS=',' read -ra array <<<"${WRT_OVEPN_TOTP_PARAMS}"
+      for p in "${array[@]}"; do
+        p="${p#"${p%%[![:space:]]*}"}"
+        p="${p%"${p##*[![:space:]]}"}"
+        [[ -z "${p}" ]] && continue
+        [[ "${p%%=*}" == 'base32' ]] && {
+          has_base32='yes'
+          [[ "${p#base32=}" == 'no' ]] && continue
+          p='base32'
+        }
+        [[ "${p%%=*}" == 'totp' ]] && has_totp='yes'
+        oath_args+=("--${p}")
+      done
+    }
+    [[ "${has_base32}" == 'yes' ]] || oath_args+=('--base32')
+    [[ "${has_totp}" == 'yes' ]] || oath_args+=('--totp')
+    /usr/bin/env printf '%s\n' "${oath_args[@]}" >etc/openvpn/ovepn.oath
+  )
+  /usr/bin/env chown root:root etc/openvpn/ovepn.ovpn etc/openvpn/ovepn.cred \
+    etc/openvpn/ovepn.totp etc/openvpn/ovepn.oath
+  /usr/bin/env chmod 600 etc/openvpn/ovepn.ovpn etc/openvpn/ovepn.cred \
+    etc/openvpn/ovepn.totp etc/openvpn/ovepn.oath
 }
 
 # removing lan tag on wan port:
