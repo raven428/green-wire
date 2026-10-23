@@ -1,0 +1,2 @@
+# lan sources for ovepn
+192.168.77.18/31
