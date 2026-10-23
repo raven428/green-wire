@@ -1,0 +1,5 @@
+# mark selected lan sources to destinations pushed by openvpn
+chain ovepn_lan {
+  type filter hook prerouting priority mangle + 1; policy accept;
+  ip saddr @ovepn4lan ip daddr @ovepn4dst meta mark set 0x197
+}
