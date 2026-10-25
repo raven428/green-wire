@@ -16,22 +16,48 @@ source "${conf_file}"
 authelia"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
+infisical_token=''
 for secret in ${secrets}; do
   current_var='vault'
   eval "current_var=\"\$WRT_${secret}\""
-  [[ "${current_var}" == 'vault' ]] && [[ -v 'INFISICAL_TOKEN' ]] && {
-    current_var="$(
-      /usr/bin/env curl -Lm 33 --request GET \
-        --header "Authorization: Bearer ${INFISICAL_TOKEN}" \
+  [[ "${current_var}" == 'vault' ]] && {
+    if [[ -z "${infisical_token}" ]]; then
+      : "${INFISICAL_PROJECT_ID:?Infisical project ID is required, not organization ID}"
+      : "${INFISICAL_CLIENT_ID:?Infisical Universal Auth client ID is required}"
+      : "${INFISICAL_CLIENT_SECRET:?Infisical Universal Auth client secret is required}"
+      # shellcheck disable=SC2016
+      if ! infisical_token="$(
+        /usr/bin/env jq -cn \
+          --arg clientId "${INFISICAL_CLIENT_ID}" \
+          --arg clientSecret "${INFISICAL_CLIENT_SECRET}" \
+          '{clientId: $clientId, clientSecret: $clientSecret}' |
+          /usr/bin/env curl --silent --show-error --fail --max-time 33 \
+            --request POST --header 'Content-Type: application/json' \
+            --data-binary @- \
+            --url 'https://us.infisical.com/api/v1/auth/universal-auth/login' |
+          /usr/bin/env jq -er '.accessToken | select(type == "string" and length > 0)'
+      )"; then
+        printf 'Infisical authentication failed. Giving up…\n' >&2
+        exit 1
+      fi
+      if [[ "${GITHUB_ACTIONS:-false}" == 'true' ]]; then
+        printf '::add-mask::%s\n' "${infisical_token}"
+      fi
+    fi
+    if ! current_var="$(
+      /usr/bin/env curl --silent --show-error --fail --max-time 33 --get \
+        --header "Authorization: Bearer ${infisical_token}" \
+        --data-urlencode "workspaceId=${INFISICAL_PROJECT_ID}" \
+        --data-urlencode "environment=${INFISICAL_ENVIRONMENT:-prod}" \
+        --data-urlencode "secretPath=${INFISICAL_SECRET_PATH:-/}" \
         --url "https://us.infisical.com/api/v3/secrets/raw/\
-grewi-${file_base}-${secret}" \
-        2>/dev/null |
-        /usr/bin/env jq -r '.secret.secretValue'
-    )"
-    [[ "${current_var}" == 'null' ]] && {
-      echo "Vault of [grewi-${file_base}-${secret}] is null. Giving up…"
+grewi-${file_base}-${secret}" |
+        /usr/bin/env jq -er '.secret.secretValue | select(type == "string")'
+    )"; then
+      printf 'Failed to read Infisical secret [grewi-%s-%s]. Giving up…\n' \
+        "${file_base}" "${secret}" >&2
       exit 1
-    }
+    fi
     export "WRT_${secret}=${current_var}"
   }
   [[ "${current_var}" != 'null' && "${current_var}" != "${file_base}" ]] &&
