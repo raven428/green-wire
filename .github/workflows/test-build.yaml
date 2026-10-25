@@ -54,9 +54,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.REGISTRY_WRITER }}
           WRT_OPKG_REPO: ${{ secrets.WRT_OPKG_REPO }}
-          INFISICAL_CLIENT_ID: ${{ secrets.INFISICAL_CLIENT_ID }}
-          INFISICAL_PROJECT_ID: ${{ secrets.INFISICAL_PROJECT_ID }}
-          INFISICAL_CLIENT_SECRET: ${{ secrets.INFISICAL_CLIENT_SECRET }}
+          INFISICAL_TOKEN: ${{ secrets.INFISICAL_TOKEN }}
         run: NAME2BUILD='${{ matrix.element }}' ./build.sh
       - name: release [${{ matrix.element }}] image
         if: >-
