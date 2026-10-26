@@ -58,6 +58,19 @@ done
 /usr/bin/env printf "\n———⟨ building [%s] image ⟩———\n" "${file_base}"
 /usr/bin/env rm -rf prepare release
 /usr/bin/env cp -r files prepare
+# rust binaries are built from rust/ workspace and placed by the explicit list
+rust_ver="$(/usr/bin/env sed -En 's/^channel\s*=\s*"([^"]+)".*/\1/p' \
+  rust/rust-toolchain.toml)"
+/usr/bin/env podman run --rm -i --network=host --name=rust-builder -u 0 \
+  -v "$(pwd)/rust:/rust:rw" -w /rust "mirror.gcr.io/library/rust:${rust_ver}-slim" \
+  /usr/bin/env bash -c "cargo build --release --locked --target aarch64-unknown-linux-musl"
+declare -A rust_bins=(
+  ['ovepn-hook']='prepare/usr/libexec/ovepn-hook'
+)
+for bin in "${!rust_bins[@]}"; do
+  /usr/bin/env install -vDm 755 \
+    "rust/target/aarch64-unknown-linux-musl/release/${bin}" "${rust_bins[${bin}]}"
+done
 export WRT_ARCH="${WRT_ARCH:-"aarch64_cortex-a53"}"
 export WRT_BOARD="${WRT_BOARD:-"mediatek/filogic"}"
 export WRT_KMODS="${WRT_KMODS:-"6.6.86-1-6ace983a14b769f576fe9c4c7961bd89"}"
@@ -103,7 +116,7 @@ export WRT_OVEPN_PASSWD=$(quote "${WRT_OVEPN_PASSWD:-"null"}")
 export WRT_OVEPN_TOTP_KEY=$(quote "${WRT_OVEPN_TOTP_KEY:-"null"}")
 export WRT_OVEPN_TOTP_PARAMS=$(quote "${WRT_OVEPN_TOTP_PARAMS:-"null"}")
 export WRT_OVEPN_CA=$(quote "${WRT_OVEPN_CA:-"null"}")
-export WRT_OVEPN_DOMAINS=$(quote "${WRT_OVEPN_DOMAINS:-"null"}")
+export WRT_OVEPN_HOOK=$(quote "${WRT_OVEPN_HOOK:-"null"}")
 export WRT_WARP_REGIONS=$(quote "${WRT_WARP_REGIONS:-"m"}")
 export WRT_WARP_REG=$(quote "${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}")
 export WRT_OTHER_ROUTES=$(quote "${WRT_OTHER_ROUTES:-"tr cy kz ge de us ng cl bg it ar \
@@ -111,7 +124,7 @@ uy se nl cz"}")
 export WRT_WIFI_MAC_FILTER=$(quote "${WRT_WIFI_MAC_FILTER:-"null"}")
 export WRT_CLIENTS=$(quote "${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
 dir300@00:21:91:31:98:60#99"}")
-export WRT_PORT_FORWARD=$(quote "${WRT_PORT_FORWARD:-"transmission@11000-11110#114"}")
+export WRT_PORT_FORWARD=$(quote "${WRT_PORT_FORWARD:-"transmission@11000-11110#112"}")
 EOF
 /usr/bin/env rm -rfv prepare/root/dot-git
 /usr/bin/env cp -r .git/modules/files/root prepare/root/dot-git
