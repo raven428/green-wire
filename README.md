@@ -12,7 +12,7 @@
   green-wire && cd green-wire
   ```
 
-- set [secrets for `build.sh`](build.sh#L60-L106) in `green-wise/OpenWRT/name.sh`
+- set [secrets for `build.sh`](build.sh#L86-L129) in `green-wise/OpenWRT/name.sh`
 - build images
 
   ```bash
@@ -24,6 +24,34 @@
   ```bash
   git checkout master && git pull
   git tag -fm $(git branch --sho) 031 && git push origin --force $(git describe)
+  ```
+
+## Rust binaries
+
+Rust packages live in the `rust/` workspace, every package builds one binary of the same name. `build.sh` compiles the workspace in the `docker.io/library/rust:<version>-slim` container, where the version comes from `rust/rust-toolchain.toml`, and places binaries into the image by the explicit `rust_bins` list.
+
+- build locally:
+
+  ```bash
+  cd rust && cargo build --release --locked --target aarch64-unknown-linux-musl
+  ```
+
+- `ovepn-hook` handles OpenVPN pushes and re-reads `/etc/openvpn/ovepn.toml` on every reconnect, the file is the `WRT_OVEPN_HOOK` secret as is, declared in `green-wise/OpenWRT/<name>.sh` like other `WRT_OVEPN_*` secrets; without it the file is absent and the hook works with the empty config:
+
+  ```toml
+  # networks always routed into the tunnel: address, address/prefix or address/netmask
+  nets = ["10.20.30.40", "10.20.31.0/24", "10.20.32.0/255.255.255.0"]
+  # pushed public networks: "none" to ignore all or "/N" to accept up to /N
+  public = "/30"
+  # extra domains resolved by pushed dns servers
+  domains = ["corp.example"]
+  ```
+
+- pull requests changing `rust/` upload binaries into the shared `v999` draft of this repository, replacing assets with the same name. A pushed `<package>/<version>` tag releases only that package and fails unless the version matches `rust/<package>/Cargo.toml`:
+
+  ```bash
+  git checkout master && git pull; TAG4REL='ovepn-hook/0.1.0'
+  git tag -fm $(git branch --sho) ${TAG4REL} && git push --force origin ${TAG4REL}
   ```
 
 ## Clean eMMC install steps
