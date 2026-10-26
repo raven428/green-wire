@@ -67,3 +67,31 @@ SPELL_CSPELL_PRE_COMMANDS:
   - command: "npm install --prefix /node-deps @cspell/dict-ru_ru
       @cspell/dict-software-terms"
     cwd: root
+RUST_CLIPPY_CLI_EXECUTABLE:
+  - /clippy-custom.sh
+RUST_CLIPPY_ARGUMENTS:
+  - "--all-targets"
+  - "--"
+  - "-D"
+  - "warnings"
+RUST_CLIPPY_PRE_COMMANDS:
+  - command: |
+      cat <<'EOF' > /clippy-custom.sh
+      #!/usr/bin/env bash
+      [[ $1 = "--version" ]] && {
+        cargo-clippy "$@"
+        exit $?
+      }
+      rc=0
+      dir_list='rust'
+      workspace="${PWD}"
+      for d in ${dir_list}; do
+        cd "${workspace}/${d}"
+        rustup toolchain install || rc=1
+        cargo clippy "$@" || rc=1
+      done
+      exit $rc
+      EOF
+      chmod -v 755 /clippy-custom.sh
+    cwd: workspace
+    continue_if_failed: true
