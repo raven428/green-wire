@@ -1,6 +1,6 @@
 [package]
 name = "ovepn-hook"
-version = "0.1.0"
+version = "999.9.9"
 edition = "2024"
 publish = false
 [dependencies]
