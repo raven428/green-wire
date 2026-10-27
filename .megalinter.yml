@@ -87,7 +87,6 @@ RUST_CLIPPY_PRE_COMMANDS:
       workspace="${PWD}"
       for d in ${dir_list}; do
         cd "${workspace}/${d}"
-        rustup toolchain install || rc=1
         cargo clippy "$@" || rc=1
       done
       exit $rc

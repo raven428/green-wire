@@ -1,5 +1,3 @@
-# musl targets are static and self-contained, no C cross toolchain required
+# the aarch64 musl target is static and self-contained, no C cross toolchain required
 [target.aarch64-unknown-linux-musl]
-linker = "rust-lld"
-[target.x86_64-unknown-linux-musl]
 linker = "rust-lld"
