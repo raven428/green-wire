@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -ueo pipefail
 [[ -d 'green-wise' ]] ||
-  /usr/bin/env git clone "https://${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
+  /usr/bin/env git clone \
+    "https://x-access-token:${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
 file_base=${NAME2BUILD:-"werter"}
 conf_file="green-wise/OpenWRT/${file_base}.sh"
 # shellcheck source=/dev/null
@@ -12,7 +13,7 @@ source "${conf_file}"
 : "${WRT_HOSTNAME:="werter"}"
 : "${WRT_OPKG_REPO:="downloads.openwrt.org"}"
 : "${DISABLED_SERVICES:="dockerd podman bird monit softflowd nfcapd tun2ray nginx \
-authelia swanctl"}"
+authelia"}"
 secrets="$(/usr/bin/env grep -E '^export\s+WRT' "${conf_file}" |
   /usr/bin/env sed -E 's/^export\s+WRT_([a-z0-9_]+)=.+/\1/i')"
 for secret in ${secrets}; do
@@ -28,10 +29,10 @@ grewi-${file_base}-${secret}" \
         /usr/bin/env jq -r '.secret.secretValue'
     )"
     [[ "${current_var}" == 'null' ]] && {
-      echo "Vault of [${secret}] is null. Giving up…"
+      echo "Vault of [grewi-${file_base}-${secret}] is null. Giving up…"
       exit 1
     }
-    eval "export WRT_${secret}='${current_var}'"
+    export "WRT_${secret}=${current_var}"
   }
   [[ "${current_var}" != 'null' && "${current_var}" != "${file_base}" ]] &&
     /usr/bin/env printf "::add-mask::%s\n" "$(
@@ -57,53 +58,73 @@ done
 /usr/bin/env printf "\n———⟨ building [%s] image ⟩———\n" "${file_base}"
 /usr/bin/env rm -rf prepare release
 /usr/bin/env cp -r files prepare
+# rust binaries are built from rust/ workspace and placed by the explicit list
+rust_ver="$(/usr/bin/env sed -En 's/^channel\s*=\s*"([^"]+)".*/\1/p' \
+  rust/rust-toolchain.toml)"
+/usr/bin/env podman run --rm -i --network=host --name=rust-builder -u 0 \
+  -v "$(pwd)/rust:/rust:rw" -w /rust "mirror.gcr.io/library/rust:${rust_ver}-slim" \
+  /usr/bin/env bash -c "cargo build --release --locked --target aarch64-unknown-linux-musl"
+declare -A rust_bins=(
+  ['ovepn-hook']='prepare/usr/libexec/ovepn-hook'
+)
+for bin in "${!rust_bins[@]}"; do
+  /usr/bin/env install -vDm 755 \
+    "rust/target/aarch64-unknown-linux-musl/release/${bin}" "${rust_bins[${bin}]}"
+done
 export WRT_ARCH="${WRT_ARCH:-"aarch64_cortex-a53"}"
 export WRT_BOARD="${WRT_BOARD:-"mediatek/filogic"}"
 export WRT_KMODS="${WRT_KMODS:-"6.6.86-1-6ace983a14b769f576fe9c4c7961bd89"}"
-export WRT_BUILDER="${WRT_BUILDER:-"ghcr.io/raven428/container-images/\
-owrt-mtk-filogic-24_10_1:000"}"
+export WRT_BUILDER="${WRT_BUILDER:-"ghcr.io/megalomania428/\
+owrt-mtk-filogic-24_10_1:latest"}"
 # WRT_ADD_PKGS="${WRT_ADD_PKGS:-""}"
 # WRT_SIZE_ROOT="${WRT_SIZE_ROOT:-"2222"}"
 # WRT_SIZE_EXTRA="${WRT_SIZE_EXTRA:-"5155"}"
+quote() {
+  echo "${1@Q}"
+}
 /usr/bin/env cat <<EOF >prepare/etc/secrets.sh
-export WRT_GREWIBU='${VER}'
-export WRT_BOARD='${WRT_BOARD:-"mediatek/filogic"}'
-export WRT_CO_SUFFIX='${WRT_CO_SUFFIX:-"none"}'
-export WRT_ROOT_PASSWD='${WRT_DEF_PASSWD:-"luc1-r00t+pa5Swd"}'
-export WRT_LUCI_CGI='${WRT_LUCI_CGI:-"cgi-bin"}'
-export WRT_LUCI_STA='${WRT_LUCI_STA:-"luci-static"}'
-export WRT_URI_3X_UI='${WRT_URI_3X_UI:-"3xui"}'
-export WRT_CLOFA_TO='${WRT_CLOFA_TO:-"cloudflare-token-for-ddns"}'
-export WRT_CLOFA_ZO='${WRT_CLOFA_ZO:-"cloudflare-zone-for-ddns"}'
-export WRT_SMTP_HOST='${WRT_SMTP_HOST:-"smtp-relay-host"}'
-export WRT_SMTP_LOGIN='${WRT_SMTP_LOGIN:-"smtp-relay-login"}'
-export WRT_SMTP_PASSWD='${WRT_SMTP_PASSWD:-"smtp-relay-password"}'
-export WRT_DEVICE_MAC='${WRT_DEVICE_MAC:-"01:a2:b3:c4:d6:e6"}'
-export WRT_HOSTNAME='${WRT_HOSTNAME:-"werter"}'
-export WRT_SECRET_TLD='${WRT_SECRET_TLD:-"domain.tld"}'
-export WRT_OPKG_REPO='${WRT_OPKG_REPO}'
-export WRT_LAN3OCT='${WRT_LAN3OCT:-"192.168.69"}'
-export WRT_WIFI_SSID='${WRT_WIFI_SSID:-"werter"}'
-export WRT_WIFI_KEY='${WRT_WIFI_KEY:-"d3fAu1t!w1F1-ke4"}'
-export WRT_COUCH_URI='${WRT_COUCH_URI:-"s3cre1patht0som3couchDataba5e"}'
-export WRT_AUTHELIA_URI='${WRT_AUTHELIA_URI:-"s3cre1pathtAuthe1iaURI4pr0tect"}'
-export WRT_AUTHELIA_JWT='${WRT_AUTHELIA_JWT:-"s3cre1jwt0kenAuthe1ia4pr0tect"}'
-export WRT_AUTHELIA_SES='${WRT_AUTHELIA_SES:-"s3cre1se5si0ntAuthe1ia4pr0tect"}'
-export WRT_AUTHELIA_DBKEY='${WRT_AUTHELIA_DBKEY:-"s3cre1DaTabKe4Authe1ia4pr0tect"}'
-export WRT_L2TP_SERVER='${WRT_L2TP_SERVER:-"10.23.45.67"}'
-export WRT_L2TP_LOGIN='${WRT_L2TP_LOGIN:-"l2tp-user"}'
-export WRT_L2TP_PASSWD='${WRT_L2TP_PASSWD:-"l2tp-password"}'
-export WRT_LAN2WAN_TAG='${WRT_LAN2WAN_TAG:-"null"}'
-export WRT_ACME_STAR='${WRT_ACME_STAR:-"null"}'
-export WRT_IPSEC_PSK='${WRT_IPSEC_PSK:-"s3cre1P5k4ipSek4pr0tect"}'
-export WRT_WARP_REGIONS='${WRT_WARP_REGIONS:-"m"}'
-export WRT_WARP_REG='${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}'
-export WRT_OTHER_ROUTES='${WRT_OTHER_ROUTES:-"tr cy kz ge de us ng cl bg it ar uy \
-se nl cz"}'
-export WRT_WIFI_MAC_FILTER='${WRT_WIFI_MAC_FILTER:-"null"}'
-export WRT_CLIENTS='${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
-dir300@00:21:91:31:98:60#99"}'
-export WRT_PORT_FORWARD='${WRT_PORT_FORWARD:-"transmission@11000-11110#114"}'
+export WRT_GREWIBU=$(quote "${VER}")
+export WRT_BOARD=$(quote "${WRT_BOARD:-"mediatek/filogic"}")
+export WRT_CO_SUFFIX=$(quote "${WRT_CO_SUFFIX:-"none"}")
+export WRT_ROOT_PASSWD=$(quote "${WRT_DEF_PASSWD:-"luc1-r00t+pa5Swd"}")
+export WRT_LUCI_CGI=$(quote "${WRT_LUCI_CGI:-"cgi-bin"}")
+export WRT_LUCI_STA=$(quote "${WRT_LUCI_STA:-"luci-static"}")
+export WRT_URI_3X_UI=$(quote "${WRT_URI_3X_UI:-"3xui"}")
+export WRT_CLOFA_TO=$(quote "${WRT_CLOFA_TO:-"cloudflare-token-for-ddns"}")
+export WRT_CLOFA_ZO=$(quote "${WRT_CLOFA_ZO:-"cloudflare-zone-for-ddns"}")
+export WRT_SMTP_HOST=$(quote "${WRT_SMTP_HOST:-"smtp-relay-host"}")
+export WRT_SMTP_LOGIN=$(quote "${WRT_SMTP_LOGIN:-"smtp-relay-login"}")
+export WRT_SMTP_PASSWD=$(quote "${WRT_SMTP_PASSWD:-"smtp-relay-password"}")
+export WRT_DEVICE_MAC=$(quote "${WRT_DEVICE_MAC:-"01:a2:b3:c4:d6:e6"}")
+export WRT_HOSTNAME=$(quote "${WRT_HOSTNAME:-"werter"}")
+export WRT_SECRET_TLD=$(quote "${WRT_SECRET_TLD:-"domain.tld"}")
+export WRT_OPKG_REPO=$(quote "${WRT_OPKG_REPO}")
+export WRT_LAN3OCT=$(quote "${WRT_LAN3OCT:-"192.168.69"}")
+export WRT_WIFI_SSID=$(quote "${WRT_WIFI_SSID:-"werter"}")
+export WRT_WIFI_KEY=$(quote "${WRT_WIFI_KEY:-"d3fAu1t!w1F1-ke4"}")
+export WRT_COUCH_URI=$(quote "${WRT_COUCH_URI:-"s3cre1patht0som3couchDataba5e"}")
+export WRT_AUTHELIA_URI=$(quote "${WRT_AUTHELIA_URI:-"s3cre1pathtAuthe1iaURI4pr0tect"}")
+export WRT_AUTHELIA_JWT=$(quote "${WRT_AUTHELIA_JWT:-"s3cre1jwt0kenAuthe1ia4pr0tect"}")
+export WRT_AUTHELIA_SES=$(quote "${WRT_AUTHELIA_SES:-"s3cre1se5si0ntAuthe1ia4pr0tect"}")
+export WRT_AUTHELIA_DBKEY=$(quote \
+  "${WRT_AUTHELIA_DBKEY:-"s3cre1DaTabKe4Authe1ia4pr0tect"}")
+export WRT_LAN2WAN_TAG=$(quote "${WRT_LAN2WAN_TAG:-"null"}")
+export WRT_ACME_STAR=$(quote "${WRT_ACME_STAR:-"null"}")
+export WRT_OVEPN_REMOTES=$(quote "${WRT_OVEPN_REMOTES:-"null"}")
+export WRT_OVEPN_LOGIN=$(quote "${WRT_OVEPN_LOGIN:-"null"}")
+export WRT_OVEPN_PASSWD=$(quote "${WRT_OVEPN_PASSWD:-"null"}")
+export WRT_OVEPN_TOTP_KEY=$(quote "${WRT_OVEPN_TOTP_KEY:-"null"}")
+export WRT_OVEPN_TOTP_PARAMS=$(quote "${WRT_OVEPN_TOTP_PARAMS:-"null"}")
+export WRT_OVEPN_CA=$(quote "${WRT_OVEPN_CA:-"null"}")
+export WRT_OVEPN_HOOK=$(quote "${WRT_OVEPN_HOOK:-"null"}")
+export WRT_WARP_REGIONS=$(quote "${WRT_WARP_REGIONS:-"m"}")
+export WRT_WARP_REG=$(quote "${WRT_WARP_REG:-"172.16.0.2,26:06:47::00,private_key"}")
+export WRT_OTHER_ROUTES=$(quote "${WRT_OTHER_ROUTES:-"tr cy kz ge de us ng cl bg it ar \
+uy se nl cz"}")
+export WRT_WIFI_MAC_FILTER=$(quote "${WRT_WIFI_MAC_FILTER:-"null"}")
+export WRT_CLIENTS=$(quote "${WRT_CLIENTS:-"caga@50:e5:49:cb:b5:67#1,
+dir300@00:21:91:31:98:60#99"}")
+export WRT_PORT_FORWARD=$(quote "${WRT_PORT_FORWARD:-"transmission@11000-11110#114"}")
 EOF
 /usr/bin/env rm -rfv prepare/root/dot-git
 /usr/bin/env cp -r .git/modules/files/root prepare/root/dot-git
@@ -143,13 +164,12 @@ src/gz openwrt_routing   ${r}/packages/${WRT_ARCH}/routing
 src/gz openwrt_packages  ${r}/packages/${WRT_ARCH}/packages
 src/gz openwrt_telephony ${r}/packages/${WRT_ARCH}/telephony
 EOF
-[[ ${WRT_IPSEC_PSK:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
-  DISABLED_SERVICES="${DISABLED_SERVICES} ipsec"
-[[ ${WRT_L2TP_LOGIN:-"null"} != 'null' &&
-  ${WRT_L2TP_PASSWD:-"null"} != 'null' &&
-  ${WRT_L2TP_SERVER:-"null"} != 'null' ]] ||
-  DISABLED_SERVICES="${DISABLED_SERVICES} xl2tpd"
+[[ ${WRT_OVEPN_REMOTES:-"null"} != 'null' &&
+  ${WRT_OVEPN_LOGIN:-"null"} != 'null' &&
+  ${WRT_OVEPN_PASSWD:-"null"} != 'null' &&
+  ${WRT_OVEPN_TOTP_KEY:-"null"} != 'null' &&
+  ${WRT_OVEPN_CA:-"null"} != 'null' ]] ||
+  DISABLED_SERVICES="${DISABLED_SERVICES} openvpn ovepn-auth"
 /usr/bin/env podman run --rm -i --network=host --name=openwrt-builder \
   -v "$(pwd)"/prepare:/files:rw -u 0 \
   -v "$(pwd)/release:/builder/bin/targets/${WRT_BOARD}:rw" \
@@ -171,10 +191,10 @@ EOF
   podman pv python3 resize2fs rsync sed sfdisk socksify softflowd ss strace stubby tar \
   tcpdump telnet-bsd terminfo tmux vim-fuller wg-installer-client whereis whois \
   wireguard-tools xzdiff xzgrep xzless yq zoneinfo-all zram-swap lz4 zstd unrar \
-  logrotate nmap-full xl2tpd strongswan-full sudo prlimit bash curl stress-ng stress \
+  logrotate nmap-full openvpn-openssl oath-toolkit sudo prlimit bash curl stress-ng stress \
   usbutils smartmontools xfs-mkfs xfs-fsck xfs-admin xfs-growfs nvme-cli progress tree \
   pigz busybox gzip iptraf-ng nload -logd librespeed-go f2fsck rsyslog speedtest-go \
-  python3-speedtest-cli nping-ssl httping \
+  python3-speedtest-cli nping-ssl httping -odhcpd-ipv6only \
   ${WRT_ADD_PKGS//$'\n'/ } \
   \
   coreutils coreutils-b2sum coreutils-base32 coreutils-base64 coreutils-basename \
@@ -198,7 +218,7 @@ EOF
   coreutils-tr coreutils-true coreutils-truncate coreutils-tsort coreutils-tty \
   coreutils-uname coreutils-unexpand coreutils-uniq coreutils-unlink psmisc \
   coreutils-users coreutils-vdir coreutils-wc coreutils-who coreutils-whoami \
-  coreutils-yes net-tools-route \
+  coreutils-yes net-tools-route ntpd ntp-utils \
   \
   kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
   kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
@@ -290,7 +310,7 @@ src="release/${image_prefix}-ext4-sysupgrade.img.gz"
   /usr/bin/env podman run -u 0 --rm -i --network=host --name=openwrt-builder \
     -v "$(pwd)"/prepare:/files:rw \
     -v "$(pwd)/release:/builder/bin/targets/${WRT_BOARD}:rw" \
-    ghcr.io/raven428/container-images/owrt-mtk-filogic-24_10_1:000 \
+    ghcr.io/megalomania428/owrt-mtk-filogic-24_10_1:latest \
     /usr/bin/env bash -c " \
     cp -v /files/etc/opkg/distfeeds.conf /builder/repositories.conf &&
     make image PROFILE='${WRT_PROFILE}' FILES='/files' \
@@ -303,7 +323,8 @@ src="release/${image_prefix}-ext4-sysupgrade.img.gz"
     kmod-nft-tproxy kmod-dummy kmod-tun kmod-usb-storage kmod-fs-vfat kmod-fs-exfat \
     kmod-fs-msdos kmod-fs-xfs kmod-fs-ext4 kmod-fs-f2fs kmod-fs-ntfs kmod-fs-ntfs3 \
     \
-    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod ${WRT_ADD_PKGS} \
+    shadow-chpasswd shadow-chsh shadow-passwd shadow-usermod -odhcpd-ipv6only \
+    ${WRT_ADD_PKGS} \
     ' \
   "
   /usr/bin/env zcat "release/${image_prefix}-sdcard.img.gz" >"${dest_prefix}-install.img"
