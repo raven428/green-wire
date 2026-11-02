@@ -1,6 +1,6 @@
 --- usr/bin/msmtpq-orig	2024-11-29 15:39:28.144075774 +0000
 +++ usr/bin/msmtpq	2024-11-29 15:39:59.476153191 +0000
-@@ -172,26 +172,13 @@
+@@ -172,26 +172,22 @@
  ## write/remove queue lockfile for a queue op
  ##
  lock_queue() {        # <-- '-u' to remove lockfile
@@ -26,10 +26,20 @@
 -    unset LKD                        # unset flag
 +  local LOK="${MSMTPQ_Q}/.lock"
 +  if [[ -z "$1" ]] ; then              # lock queue
-+    exec 9> "${LOK}"
-+    /usr/bin/env flock 9
++    exec 9> "${LOK}" || {
++      err '' "cannot open queue lock [ $LOK ]" ''
++      exit 1
++    }
++    /usr/bin/env flock -w 222 9 || {
++      exec 9>&-
++      err '' "queue lock wait failed [ $LOK ]" ''
++      exit 1
++    }
++    LKD='t'
 +  elif [[ "$1" = '-u' ]] ; then        # unlock queue
 +    /usr/bin/env flock -u 9
-+    /usr/bin/env rm -f "${LOK}"
++    exec 9>&-
++    unset LKD
    fi
  }
+ 

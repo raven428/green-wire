@@ -1,0 +1,52 @@
+# kics-scan disable=555ab8f9-2001-455e-a077-f2d0f41e2fb9
+# cspell:ignore dependabot
+---
+name: rust
+on:
+  pull_request:
+    paths:
+      - "rust/**"
+      - "rust.sh"
+      - ".github/workflows/rust.yaml"
+  push:
+    tags:
+      - "*/*"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
+permissions: {}
+jobs:
+  binaries:
+    name: binaries
+    if: github.event_name != 'pull_request' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login != 'dependabot[bot]')
+    timeout-minutes: 55
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+      - name: test and build
+        run: ./rust.sh
+      - name: upload binaries
+        uses: ncipollo/release-action@v1
+        with:
+          name: >-
+            ${{ github.ref_type == 'tag' && github.ref_name ||
+            format('branch [{0}] binaries', github.head_ref) }}
+          body: >-
+            ${{ github.ref_type != 'tag' &&
+            format('branch [{0}] build from recent commit', github.head_ref) || '' }}
+          draft: ${{ github.ref_type != 'tag' }}
+          allowUpdates: true
+          replacesArtifacts: true
+          tag: ${{ github.ref_type == 'tag' && github.ref_name || 'v999' }}
+          artifacts: "${{ env.ASSETS }}/*"

@@ -5,11 +5,14 @@ on:
   push:
     tags:
       - "*"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   define-matrix:
     name: define matrix
     timeout-minutes: 11
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       matrix_list: ${{ steps.define-matrix.outputs.matrix_list }}
     steps:
@@ -19,6 +22,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           submodules: true
+          persist-credentials: false
       - name: define matrix
         id: define-matrix
         env:
@@ -44,7 +48,7 @@ jobs:
       fail-fast: false
       matrix:
         element: ${{ fromJSON(needs.define-matrix.outputs.matrix_list) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: checkout the repos
         uses: actions/checkout@v5
@@ -52,6 +56,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
           submodules: recursive
+          persist-credentials: false
       - name: build [${{ matrix.element }}] image
         env:
           VER: ${{ github.ref_name }}
