@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -ueo pipefail
 [[ -d 'green-wise' ]] ||
-  /usr/bin/env git clone "https://${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
+  /usr/bin/env git clone \
+    "https://x-access-token:${GITHUB_TOKEN}@github.com/raven428/green-wise.git"
 JSON_LIST='['
 for conf_file in green-wise/OpenWRT/*.sh; do
   file_base="$(basename "${conf_file%.*}")"
